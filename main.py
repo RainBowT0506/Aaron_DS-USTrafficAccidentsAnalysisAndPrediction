@@ -338,7 +338,7 @@ def visualize_top_10_states_with_most_accidents():
     state_accidents_count_top10_fig = px.bar(state_accidents_count_top10_df,
                                              x=state_accidents_count_top10_df.index,
                                              y="count",
-                                             labels={"index": "State", "count": "Counts"},
+                                             labels={"index": "County", "count": "Counts"},
                                              text="count")
     state_accidents_count_top10_fig.update_layout(
         autosize=False,
@@ -381,12 +381,15 @@ def visualize_top_10_counties_with_most_accidents():
     # Top 10 Counties with the Most Accidents
     county_accidents_count = data_best_df["County"].value_counts()
     county_accidents_count_top10 = county_accidents_count[:10]
-    county_accidents_count_top10_df = pd.DataFrame(county_accidents_count_top10)
+    print("visualize_top_10_counties_with_most_accidents")
+    print(county_accidents_count_top10)
+    county_accidents_count_top10_df = pd.DataFrame(county_accidents_count_top10, columns=['count'])
+    county_accidents_count_top10_df.index.name = 'County'
     county_accidents_count_top10_fig = px.bar(county_accidents_count_top10_df,
                                               x=county_accidents_count_top10_df.index,
-                                              y="County",
-                                              labels={"index": "County", "County": "Counts"},
-                                              text="County")
+                                              y="count",
+                                              labels={"index": "County", "count": "Counts"},
+                                              text="count")
     county_accidents_count_top10_fig.update_layout(
         autosize=False,
         width=1000,
@@ -400,7 +403,6 @@ def visualize_top_10_counties_with_most_accidents():
             'yanchor': 'top'})
     county_accidents_count_top10_fig.update_yaxes(categoryorder="total ascending")
     county_accidents_count_top10_fig.show()
-
 
 # 3.2.2. What are the top 10 counties with the most accidents?
 visualize_top_10_counties_with_most_accidents()
@@ -428,9 +430,9 @@ def visualize_top_10_cities_with_most_accidents():
     city_accidents_count_top10_df = pd.DataFrame(city_accidents_count_top10)
     city_accidents_count_top10_fig = px.bar(city_accidents_count_top10_df,
                                             x=city_accidents_count_top10_df.index,
-                                            y="City",
-                                            labels={"index": "City", "City": "Counts"},
-                                            text="City")
+                                            y="count",
+                                            labels={"index": "City", "count": "Counts"},
+                                            text="count")
     city_accidents_count_top10_fig.update_layout(
         autosize=False,
         width=1000,
@@ -473,9 +475,9 @@ def visualize_top_10_streets_with_most_accidents():
     street_accidents_count_top10_df = pd.DataFrame(street_accidents_count_top10)
     street_accidents_count_top10_fig = px.bar(street_accidents_count_top10_df,
                                               x=street_accidents_count_top10_df.index,
-                                              y="Street",
-                                              labels={"index": "Street", "Street": "Counts"},
-                                              text="Street")
+                                              y="count",
+                                              labels={"index": "Street", "count": "Counts"},
+                                              text="count")
     street_accidents_count_top10_fig.update_layout(
         autosize=False,
         width=1000,
@@ -518,9 +520,9 @@ def visualize_top_10_zipcodes_with_most_accidents():
     zipcode_accidents_count_top10_df = pd.DataFrame(zipcode_accidents_count_top10)
     zipcode_accidents_count_top10_fig = px.bar(zipcode_accidents_count_top10_df,
                                                x=zipcode_accidents_count_top10_df.index,
-                                               y="Zipcode",
-                                               labels={"index": "Zipcode", "Zipcode": "Counts"},
-                                               text="Zipcode")
+                                               y="count",
+                                               labels={"index": "Zipcode", "count": "Counts"},
+                                               text="count")
     zipcode_accidents_count_top10_fig.update_layout(
         autosize=False,
         width=1000,
@@ -557,26 +559,28 @@ def visualize_top_10_zipcodes_accidents_by_severity():
 visualize_top_10_zipcodes_accidents_by_severity()
 
 
-def visualize_accident_distribution_by_street_side():
-    f, axes = plt.subplots(nrows=1, ncols=2, figsize=(20, 8))
-    # Pie chart
-    data_best_df["Side"].value_counts().plot.pie(autopct="%.1f%%", ylabel='', ax=axes[0])
-    sns.countplot(x="Side",
-                  data=data_best_df,
-                  order=data_best_df['Side'].value_counts().index,
-                  hue='Severity',
-                  ax=axes[1])
-    for p in axes[1].patches:
-        axes[1].annotate(p.get_height(), (p.get_x() + 0.05, p.get_height() + 100))
-    # Common title
-    plt.suptitle("Accidents distribution by street Side", y=0.95, fontsize=20)
-    plt.show()
-
 
 # 3.2.6. What are the accidents distribution by street Side?
 # Accidents distribution by street Side
 # Set up the matplotlib figure
-visualize_accident_distribution_by_street_side()
+# def visualize_accident_distribution_by_street_side():
+#     f, axes = plt.subplots(nrows=1, ncols=2, figsize=(20, 8))
+#     # Pie chart
+#     print("visualize_accident_distribution_by_street_side")
+#     print(data_best_df)
+#     data_best_df["Side"].value_counts().plot.pie(autopct="%.1f%%", ylabel='', ax=axes[0])
+#     sns.countplot(x="Side",
+#                   data=data_best_df,
+#                   order=data_best_df['Side'].value_counts().index,
+#                   hue='Severity',
+#                   ax=axes[1])
+#     for p in axes[1].patches:
+#         axes[1].annotate(p.get_height(), (p.get_x() + 0.05, p.get_height() + 100))
+#     # Common title
+#     plt.suptitle("Accidents distribution by street Side", y=0.95, fontsize=20)
+#     plt.show()
+#
+# visualize_accident_distribution_by_street_side()
 
 
 def visualize_yearly_accident_change():
@@ -584,9 +588,9 @@ def visualize_yearly_accident_change():
     year_accidents_count_df = pd.DataFrame(year_accidents_count)
     year_accidents_count_fig = px.bar(year_accidents_count,
                                       x=year_accidents_count.index,
-                                      y="Start_Time",
-                                      labels={"index": "Year", "Start_Time": "Counts"},
-                                      text="Start_Time")
+                                      y="count",
+                                      labels={"index": "Year", "count": "Counts"},
+                                      text="count")
     year_accidents_count_fig.update_layout(
         autosize=False,
         width=800,
@@ -601,40 +605,40 @@ def visualize_yearly_accident_change():
     year_accidents_count_fig.show()
 
 
-# # 3.3. Time Analysis
-# # 3.3.1. Accidents yearly change
-#
-# # Accidents yearly change
-# visualize_yearly_accident_change()
-#
-#
-# def visualize_yearly_change_in_registered_vehicles():
-#     # https://hedgescompany.com/automotive-market-research-statistics/auto-mailing-lists-and-marketing/
-#     registered_vehicles_df = pd.DataFrame(data=[264.0, 270.4, 279.1, 284.5, 286.9], columns=['Numbers(million)'],
-#                                           index=[2016, 2017, 2018, 2019, 2020])
-#     registered_vehicles_fig = px.bar(registered_vehicles_df,
-#                                      x=registered_vehicles_df.index,
-#                                      y="Numbers(million)",
-#                                      labels={"index": "Year"},
-#                                      text="Numbers(million)")
-#     registered_vehicles_fig.update_layout(
-#         autosize=False,
-#         width=800,
-#         height=600,
-#         title={
-#             'text': "Registered motor vehicles yearly change",
-#             'y': 0.95,
-#             'x': 0.5,
-#             'font': {'size': 24},
-#             'xanchor': 'center',
-#             'yanchor': 'top'})
-#     registered_vehicles_fig.show()
-#
-#
-# # The number of registered motor vehicles
-# visualize_yearly_change_in_registered_vehicles()
-#
-#
+# 3.3. Time Analysis
+# 3.3.1. Accidents yearly change
+
+# Accidents yearly change
+visualize_yearly_accident_change()
+
+
+def visualize_yearly_change_in_registered_vehicles():
+    # https://hedgescompany.com/automotive-market-research-statistics/auto-mailing-lists-and-marketing/
+    registered_vehicles_df = pd.DataFrame(data=[264.0, 270.4, 279.1, 284.5, 286.9], columns=['Numbers(million)'],
+                                          index=[2016, 2017, 2018, 2019, 2020])
+    registered_vehicles_fig = px.bar(registered_vehicles_df,
+                                     x=registered_vehicles_df.index,
+                                     y="Numbers(million)",
+                                     labels={"index": "Year"},
+                                     text="Numbers(million)")
+    registered_vehicles_fig.update_layout(
+        autosize=False,
+        width=800,
+        height=600,
+        title={
+            'text': "Registered motor vehicles yearly change",
+            'y': 0.95,
+            'x': 0.5,
+            'font': {'size': 24},
+            'xanchor': 'center',
+            'yanchor': 'top'})
+    registered_vehicles_fig.show()
+
+
+# The number of registered motor vehicles
+visualize_yearly_change_in_registered_vehicles()
+
+
 # def visualize_accident_vehicle_change_comparison():
 #     year_accidents_pct_df = year_accidents_count_df.sort_index().pct_change().rename(
 #         columns={'Start_Time': 'Accidents'})
