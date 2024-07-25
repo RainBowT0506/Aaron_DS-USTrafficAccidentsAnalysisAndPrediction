@@ -300,305 +300,307 @@ def visualize_distance_severity_correlation():
 # 3.1.2. What is the relationship between distance and severity?
 visualize_distance_severity_correlation()
 
-#
-# # Overview of the US traffic accidents
-# # https://plotly.com/python/choropleth-maps/
-# state_accidents_count = data_best_df["State"].value_counts()
-#
-# def visualize_top_states_with_most_accidents():
-#     fig = go.Figure(data=go.Choropleth(locations=state_accidents_count.index,
-#                                        z=state_accidents_count.values.astype(float),
-#                                        locationmode="USA-states",
-#                                        colorscale="Reds",
-#                                        colorbar_title="Frequency"
-#                                        ))
-#     fig.update_layout(
-#         height=600,
-#         width=1500,
-#         title={
-#             'text': "Frequency distribution of US Accidents",
-#             'y': 0.9,
-#             'x': 0.5,
-#             'font': {'size': 24},
-#             'xanchor': 'center',
-#             'yanchor': 'top'},
-#         geo_scope="usa")
-#     fig.show()
-#
-#
-# # 3.2. Location Analysis
-# # 3.2.1. What are the top 10 states with the most accidents?
-# visualize_top_states_with_most_accidents()
-#
-#
-# def visualize_top_10_states_with_most_accidents():
-#     state_accidents_count_top10 = state_accidents_count[:10]
-#     state_accidents_count_top10_df = pd.DataFrame(state_accidents_count_top10)
-#     state_accidents_count_top10_fig = px.bar(state_accidents_count_top10_df,
-#                                              x=state_accidents_count_top10_df.index,
-#                                              y="State",
-#                                              labels={"index": "State", "State": "Counts"},
-#                                              text="State")
-#     state_accidents_count_top10_fig.update_layout(
-#         autosize=False,
-#         width=1000,
-#         height=600,
-#         title={
-#             'text': "Top 10 States with the Most Accidents",
-#             'y': 0.95,
-#             'x': 0.5,
-#             'font': {'size': 24},
-#             'xanchor': 'center',
-#             'yanchor': 'top'})
-#     state_accidents_count_top10_fig.update_yaxes(categoryorder="total ascending")
-#     state_accidents_count_top10_fig.show()
-#
-#
-# # Top 10 States with the Most Accidents
-# visualize_top_10_states_with_most_accidents()
-#
-#
-# def visualize_top_10_states_accidents_by_severity():
-#     # Top 10 States with the Most Accidents in a view of severity
-#     plt.figure(figsize=(20, 8))
-#     ax = sns.countplot(x="State",
-#                        data=data_best_df,
-#                        order=data_best_df['State'].value_counts()[:10].index,
-#                        hue='Severity',
-#                        palette='tab10')
-#     plt.title("Top 10 States with the Most Accidents", fontsize=22)
-#     # for p in ax.patches:
-#     #        ax.annotate(p.get_height(), (p.get_x(), p.get_height()+1000))
-#     plt.show()
-#
-#
-# visualize_top_10_states_accidents_by_severity()
-#
-#
-# def visualize_top_10_counties_with_most_accidents():
-#     # Top 10 Counties with the Most Accidents
-#     county_accidents_count = data_best_df["County"].value_counts()
-#     county_accidents_count_top10 = county_accidents_count[:10]
-#     county_accidents_count_top10_df = pd.DataFrame(county_accidents_count_top10)
-#     county_accidents_count_top10_fig = px.bar(county_accidents_count_top10_df,
-#                                               x=county_accidents_count_top10_df.index,
-#                                               y="County",
-#                                               labels={"index": "County", "County": "Counts"},
-#                                               text="County")
-#     county_accidents_count_top10_fig.update_layout(
-#         autosize=False,
-#         width=1000,
-#         height=600,
-#         title={
-#             'text': "Top 10 Counties with the Most Accidents",
-#             'y': 0.95,
-#             'x': 0.5,
-#             'font': {'size': 24},
-#             'xanchor': 'center',
-#             'yanchor': 'top'})
-#     county_accidents_count_top10_fig.update_yaxes(categoryorder="total ascending")
-#     county_accidents_count_top10_fig.show()
-#
-#
-# # 3.2.2. What are the top 10 counties with the most accidents?
-# visualize_top_10_counties_with_most_accidents()
-#
-#
-# def visualize_top_10_counties_accidents_by_severity():
-#     plt.figure(figsize=(20, 8))
-#     ax = sns.countplot(x="County",
-#                        data=data_best_df,
-#                        order=data_best_df['County'].value_counts()[:10].index,
-#                        hue='Severity')
-#     plt.title("Top 10 Counties with the Most Accidents", fontsize=22)
-#     for p in ax.patches:
-#         ax.annotate(p.get_height(), (p.get_x(), p.get_height() + 400))
-#     plt.show()
-#
-#
-# # Top 10 Counties with the Most Accidents in a view of severity
-# visualize_top_10_counties_accidents_by_severity()
-#
-#
-# def visualize_top_10_cities_with_most_accidents():
-#     city_accidents_count = data_best_df["City"].value_counts()
-#     city_accidents_count_top10 = city_accidents_count[:10]
-#     city_accidents_count_top10_df = pd.DataFrame(city_accidents_count_top10)
-#     city_accidents_count_top10_fig = px.bar(city_accidents_count_top10_df,
-#                                             x=city_accidents_count_top10_df.index,
-#                                             y="City",
-#                                             labels={"index": "City", "City": "Counts"},
-#                                             text="City")
-#     city_accidents_count_top10_fig.update_layout(
-#         autosize=False,
-#         width=1000,
-#         height=600,
-#         title={
-#             'text': "Top 10 Cities with the Most Accidents",
-#             'y': 0.95,
-#             'x': 0.5,
-#             'font': {'size': 24},
-#             'xanchor': 'center',
-#             'yanchor': 'top'})
-#     city_accidents_count_top10_fig.update_yaxes(categoryorder="total ascending")
-#     city_accidents_count_top10_fig.show()
-#
-#
-# # 3.2.3. What are the top 10 cities with the most accidents?
-# # Top 10 Cities with the Most Accidents
-# visualize_top_10_cities_with_most_accidents()
-#
-#
-# def visualize_top_10_cities_accidents_by_severity():
-#     plt.figure(figsize=(20, 8))
-#     ax = sns.countplot(x="City",
-#                        data=data_best_df,
-#                        order=data_best_df['City'].value_counts()[:10].index,
-#                        hue='Severity')
-#     plt.title("Top 10 Cities with the Most Accidents", fontsize=22)
-#     for p in ax.patches:
-#         ax.annotate(p.get_height(), (p.get_x(), p.get_height() + 200))
-#     plt.show()
-#
-#
-# # Top 10 Cities with the Most Accidents in a view of severity
-# visualize_top_10_cities_accidents_by_severity()
-#
-#
-# def visualize_top_10_streets_with_most_accidents():
-#     street_accidents_count = data_best_df["Street"].value_counts()
-#     street_accidents_count_top10 = street_accidents_count[:10]
-#     street_accidents_count_top10_df = pd.DataFrame(street_accidents_count_top10)
-#     street_accidents_count_top10_fig = px.bar(street_accidents_count_top10_df,
-#                                               x=street_accidents_count_top10_df.index,
-#                                               y="Street",
-#                                               labels={"index": "Street", "Street": "Counts"},
-#                                               text="Street")
-#     street_accidents_count_top10_fig.update_layout(
-#         autosize=False,
-#         width=1000,
-#         height=600,
-#         title={
-#             'text': "Top 10 Streets with the Most Accidents",
-#             'y': 0.95,
-#             'x': 0.5,
-#             'font': {'size': 24},
-#             'xanchor': 'center',
-#             'yanchor': 'top'})
-#     street_accidents_count_top10_fig.update_yaxes(categoryorder="total ascending")
-#     street_accidents_count_top10_fig.show()
-#
-#
-# # 3.2.4. What is the top 10 Streets with the most accidents?
-# # Top 10 Streets with the Most Accidents
-# visualize_top_10_streets_with_most_accidents()
-#
-#
-# def visualize_top_10_streets_accidents_by_severity():
-#     plt.figure(figsize=(20, 8))
-#     ax = sns.countplot(x="Street",
-#                        data=data_best_df,
-#                        order=data_best_df['Street'].value_counts()[:10].index,
-#                        hue='Severity')
-#     plt.title("Top 10 Streets with the Most Accidents", fontsize=22)
-#     for p in ax.patches:
-#         ax.annotate(p.get_height(), (p.get_x(), p.get_height() + 100))
-#     plt.show()
-#
-#
-# # Top 10 Streets with the Most Accidents in a view of severity
-# visualize_top_10_streets_accidents_by_severity()
-#
-#
-# def visualize_top_10_zipcodes_with_most_accidents():
-#     zipcode_accidents_count = data_best_df["Zipcode"].value_counts()
-#     zipcode_accidents_count_top10 = zipcode_accidents_count[:10]
-#     zipcode_accidents_count_top10_df = pd.DataFrame(zipcode_accidents_count_top10)
-#     zipcode_accidents_count_top10_fig = px.bar(zipcode_accidents_count_top10_df,
-#                                                x=zipcode_accidents_count_top10_df.index,
-#                                                y="Zipcode",
-#                                                labels={"index": "Zipcode", "Zipcode": "Counts"},
-#                                                text="Zipcode")
-#     zipcode_accidents_count_top10_fig.update_layout(
-#         autosize=False,
-#         width=1000,
-#         height=600,
-#         title={
-#             'text': "Top 10 Zipcode with the Most Accidents",
-#             'y': 0.95,
-#             'x': 0.5,
-#             'font': {'size': 24},
-#             'xanchor': 'center',
-#             'yanchor': 'top'})
-#     zipcode_accidents_count_top10_fig.update_yaxes(categoryorder="total ascending")
-#     zipcode_accidents_count_top10_fig.show()
-#
-#
-# # 3.2.5. What is the top 10 Zipcode with the most accidents?
-# # Top 10 Zipcode with the Most Accidents
-# visualize_top_10_zipcodes_with_most_accidents()
-#
-#
-# def visualize_top_10_zipcodes_accidents_by_severity():
-#     plt.figure(figsize=(20, 8))
-#     ax = sns.countplot(x="Zipcode",
-#                        data=data_best_df,
-#                        order=data_best_df['Zipcode'].value_counts()[:10].index,
-#                        hue='Severity')
-#     plt.title("Top 10 Zipcode with the Most Accidents", fontsize=22)
-#     for p in ax.patches:
-#         ax.annotate(p.get_height(), (p.get_x(), p.get_height() + 10))
-#     plt.show()
-#
-#
-# # Top 10 Zipcode with the Most Accidents in a view of severity
-# visualize_top_10_zipcodes_accidents_by_severity()
-#
-#
-# def visualize_accident_distribution_by_street_side():
-#     f, axes = plt.subplots(nrows=1, ncols=2, figsize=(20, 8))
-#     # Pie chart
-#     data_best_df["Side"].value_counts().plot.pie(autopct="%.1f%%", ylabel='', ax=axes[0])
-#     sns.countplot(x="Side",
-#                   data=data_best_df,
-#                   order=data_best_df['Side'].value_counts().index,
-#                   hue='Severity',
-#                   ax=axes[1])
-#     for p in axes[1].patches:
-#         axes[1].annotate(p.get_height(), (p.get_x() + 0.05, p.get_height() + 100))
-#     # Common title
-#     plt.suptitle("Accidents distribution by street Side", y=0.95, fontsize=20)
-#     plt.show()
-#
-#
-# # 3.2.6. What are the accidents distribution by street Side?
-# # Accidents distribution by street Side
-# # Set up the matplotlib figure
-# visualize_accident_distribution_by_street_side()
-#
-#
-# def visualize_yearly_accident_change():
-#     year_accidents_count = data_best_df["Start_Time"].dt.year.value_counts()
-#     year_accidents_count_df = pd.DataFrame(year_accidents_count)
-#     year_accidents_count_fig = px.bar(year_accidents_count,
-#                                       x=year_accidents_count.index,
-#                                       y="Start_Time",
-#                                       labels={"index": "Year", "Start_Time": "Counts"},
-#                                       text="Start_Time")
-#     year_accidents_count_fig.update_layout(
-#         autosize=False,
-#         width=800,
-#         height=600,
-#         title={
-#             'text': "Accidents yearly change",
-#             'y': 0.95,
-#             'x': 0.5,
-#             'font': {'size': 24},
-#             'xanchor': 'center',
-#             'yanchor': 'top'})
-#     year_accidents_count_fig.show()
-#
-#
+
+# Overview of the US traffic accidents
+# https://plotly.com/python/choropleth-maps/
+state_accidents_count = data_best_df["State"].value_counts()
+
+# 3.2. Location Analysis
+# 3.2.1. What are the top 10 states with the most accidents?
+def visualize_top_states_with_most_accidents():
+    fig = go.Figure(data=go.Choropleth(locations=state_accidents_count.index,
+                                       z=state_accidents_count.values.astype(float),
+                                       locationmode="USA-states",
+                                       colorscale="Reds",
+                                       colorbar_title="Frequency"
+                                       ))
+    fig.update_layout(
+        height=600,
+        width=1500,
+        title={
+            'text': "Frequency distribution of US Accidents",
+            'y': 0.9,
+            'x': 0.5,
+            'font': {'size': 24},
+            'xanchor': 'center',
+            'yanchor': 'top'},
+        geo_scope="usa")
+    fig.show()
+
+visualize_top_states_with_most_accidents()
+
+def visualize_top_10_states_with_most_accidents():
+    state_accidents_count_top10 = state_accidents_count[:10]
+    print("visualize_top_10_states_with_most_accidents")
+    print(state_accidents_count_top10)
+    state_accidents_count_top10_df = pd.DataFrame(state_accidents_count_top10, columns=['count'])
+    state_accidents_count_top10_df.index.name = 'State'
+    state_accidents_count_top10_fig = px.bar(state_accidents_count_top10_df,
+                                             x=state_accidents_count_top10_df.index,
+                                             y="count",
+                                             labels={"index": "State", "count": "Counts"},
+                                             text="count")
+    state_accidents_count_top10_fig.update_layout(
+        autosize=False,
+        width=1000,
+        height=600,
+        title={
+            'text': "Top 10 States with the Most Accidents",
+            'y': 0.95,
+            'x': 0.5,
+            'font': {'size': 24},
+            'xanchor': 'center',
+            'yanchor': 'top'})
+    state_accidents_count_top10_fig.update_yaxes(categoryorder="total ascending")
+    state_accidents_count_top10_fig.show()
+
+
+
+# Top 10 States with the Most Accidents
+visualize_top_10_states_with_most_accidents()
+
+
+def visualize_top_10_states_accidents_by_severity():
+    # Top 10 States with the Most Accidents in a view of severity
+    plt.figure(figsize=(20, 8))
+    ax = sns.countplot(x="State",
+                       data=data_best_df,
+                       order=data_best_df['State'].value_counts()[:10].index,
+                       hue='Severity',
+                       palette='tab10')
+    plt.title("Top 10 States with the Most Accidents", fontsize=22)
+    # for p in ax.patches:
+    #        ax.annotate(p.get_height(), (p.get_x(), p.get_height()+1000))
+    plt.show()
+
+
+visualize_top_10_states_accidents_by_severity()
+
+
+def visualize_top_10_counties_with_most_accidents():
+    # Top 10 Counties with the Most Accidents
+    county_accidents_count = data_best_df["County"].value_counts()
+    county_accidents_count_top10 = county_accidents_count[:10]
+    county_accidents_count_top10_df = pd.DataFrame(county_accidents_count_top10)
+    county_accidents_count_top10_fig = px.bar(county_accidents_count_top10_df,
+                                              x=county_accidents_count_top10_df.index,
+                                              y="County",
+                                              labels={"index": "County", "County": "Counts"},
+                                              text="County")
+    county_accidents_count_top10_fig.update_layout(
+        autosize=False,
+        width=1000,
+        height=600,
+        title={
+            'text': "Top 10 Counties with the Most Accidents",
+            'y': 0.95,
+            'x': 0.5,
+            'font': {'size': 24},
+            'xanchor': 'center',
+            'yanchor': 'top'})
+    county_accidents_count_top10_fig.update_yaxes(categoryorder="total ascending")
+    county_accidents_count_top10_fig.show()
+
+
+# 3.2.2. What are the top 10 counties with the most accidents?
+visualize_top_10_counties_with_most_accidents()
+
+
+def visualize_top_10_counties_accidents_by_severity():
+    plt.figure(figsize=(20, 8))
+    ax = sns.countplot(x="County",
+                       data=data_best_df,
+                       order=data_best_df['County'].value_counts()[:10].index,
+                       hue='Severity')
+    plt.title("Top 10 Counties with the Most Accidents", fontsize=22)
+    for p in ax.patches:
+        ax.annotate(p.get_height(), (p.get_x(), p.get_height() + 400))
+    plt.show()
+
+
+# Top 10 Counties with the Most Accidents in a view of severity
+visualize_top_10_counties_accidents_by_severity()
+
+
+def visualize_top_10_cities_with_most_accidents():
+    city_accidents_count = data_best_df["City"].value_counts()
+    city_accidents_count_top10 = city_accidents_count[:10]
+    city_accidents_count_top10_df = pd.DataFrame(city_accidents_count_top10)
+    city_accidents_count_top10_fig = px.bar(city_accidents_count_top10_df,
+                                            x=city_accidents_count_top10_df.index,
+                                            y="City",
+                                            labels={"index": "City", "City": "Counts"},
+                                            text="City")
+    city_accidents_count_top10_fig.update_layout(
+        autosize=False,
+        width=1000,
+        height=600,
+        title={
+            'text': "Top 10 Cities with the Most Accidents",
+            'y': 0.95,
+            'x': 0.5,
+            'font': {'size': 24},
+            'xanchor': 'center',
+            'yanchor': 'top'})
+    city_accidents_count_top10_fig.update_yaxes(categoryorder="total ascending")
+    city_accidents_count_top10_fig.show()
+
+
+# 3.2.3. What are the top 10 cities with the most accidents?
+# Top 10 Cities with the Most Accidents
+visualize_top_10_cities_with_most_accidents()
+
+
+def visualize_top_10_cities_accidents_by_severity():
+    plt.figure(figsize=(20, 8))
+    ax = sns.countplot(x="City",
+                       data=data_best_df,
+                       order=data_best_df['City'].value_counts()[:10].index,
+                       hue='Severity')
+    plt.title("Top 10 Cities with the Most Accidents", fontsize=22)
+    for p in ax.patches:
+        ax.annotate(p.get_height(), (p.get_x(), p.get_height() + 200))
+    plt.show()
+
+
+# Top 10 Cities with the Most Accidents in a view of severity
+visualize_top_10_cities_accidents_by_severity()
+
+
+def visualize_top_10_streets_with_most_accidents():
+    street_accidents_count = data_best_df["Street"].value_counts()
+    street_accidents_count_top10 = street_accidents_count[:10]
+    street_accidents_count_top10_df = pd.DataFrame(street_accidents_count_top10)
+    street_accidents_count_top10_fig = px.bar(street_accidents_count_top10_df,
+                                              x=street_accidents_count_top10_df.index,
+                                              y="Street",
+                                              labels={"index": "Street", "Street": "Counts"},
+                                              text="Street")
+    street_accidents_count_top10_fig.update_layout(
+        autosize=False,
+        width=1000,
+        height=600,
+        title={
+            'text': "Top 10 Streets with the Most Accidents",
+            'y': 0.95,
+            'x': 0.5,
+            'font': {'size': 24},
+            'xanchor': 'center',
+            'yanchor': 'top'})
+    street_accidents_count_top10_fig.update_yaxes(categoryorder="total ascending")
+    street_accidents_count_top10_fig.show()
+
+
+# 3.2.4. What is the top 10 Streets with the most accidents?
+# Top 10 Streets with the Most Accidents
+visualize_top_10_streets_with_most_accidents()
+
+
+def visualize_top_10_streets_accidents_by_severity():
+    plt.figure(figsize=(20, 8))
+    ax = sns.countplot(x="Street",
+                       data=data_best_df,
+                       order=data_best_df['Street'].value_counts()[:10].index,
+                       hue='Severity')
+    plt.title("Top 10 Streets with the Most Accidents", fontsize=22)
+    for p in ax.patches:
+        ax.annotate(p.get_height(), (p.get_x(), p.get_height() + 100))
+    plt.show()
+
+
+# Top 10 Streets with the Most Accidents in a view of severity
+visualize_top_10_streets_accidents_by_severity()
+
+
+def visualize_top_10_zipcodes_with_most_accidents():
+    zipcode_accidents_count = data_best_df["Zipcode"].value_counts()
+    zipcode_accidents_count_top10 = zipcode_accidents_count[:10]
+    zipcode_accidents_count_top10_df = pd.DataFrame(zipcode_accidents_count_top10)
+    zipcode_accidents_count_top10_fig = px.bar(zipcode_accidents_count_top10_df,
+                                               x=zipcode_accidents_count_top10_df.index,
+                                               y="Zipcode",
+                                               labels={"index": "Zipcode", "Zipcode": "Counts"},
+                                               text="Zipcode")
+    zipcode_accidents_count_top10_fig.update_layout(
+        autosize=False,
+        width=1000,
+        height=600,
+        title={
+            'text': "Top 10 Zipcode with the Most Accidents",
+            'y': 0.95,
+            'x': 0.5,
+            'font': {'size': 24},
+            'xanchor': 'center',
+            'yanchor': 'top'})
+    zipcode_accidents_count_top10_fig.update_yaxes(categoryorder="total ascending")
+    zipcode_accidents_count_top10_fig.show()
+
+
+# 3.2.5. What is the top 10 Zipcode with the most accidents?
+# Top 10 Zipcode with the Most Accidents
+visualize_top_10_zipcodes_with_most_accidents()
+
+
+def visualize_top_10_zipcodes_accidents_by_severity():
+    plt.figure(figsize=(20, 8))
+    ax = sns.countplot(x="Zipcode",
+                       data=data_best_df,
+                       order=data_best_df['Zipcode'].value_counts()[:10].index,
+                       hue='Severity')
+    plt.title("Top 10 Zipcode with the Most Accidents", fontsize=22)
+    for p in ax.patches:
+        ax.annotate(p.get_height(), (p.get_x(), p.get_height() + 10))
+    plt.show()
+
+
+# Top 10 Zipcode with the Most Accidents in a view of severity
+visualize_top_10_zipcodes_accidents_by_severity()
+
+
+def visualize_accident_distribution_by_street_side():
+    f, axes = plt.subplots(nrows=1, ncols=2, figsize=(20, 8))
+    # Pie chart
+    data_best_df["Side"].value_counts().plot.pie(autopct="%.1f%%", ylabel='', ax=axes[0])
+    sns.countplot(x="Side",
+                  data=data_best_df,
+                  order=data_best_df['Side'].value_counts().index,
+                  hue='Severity',
+                  ax=axes[1])
+    for p in axes[1].patches:
+        axes[1].annotate(p.get_height(), (p.get_x() + 0.05, p.get_height() + 100))
+    # Common title
+    plt.suptitle("Accidents distribution by street Side", y=0.95, fontsize=20)
+    plt.show()
+
+
+# 3.2.6. What are the accidents distribution by street Side?
+# Accidents distribution by street Side
+# Set up the matplotlib figure
+visualize_accident_distribution_by_street_side()
+
+
+def visualize_yearly_accident_change():
+    year_accidents_count = data_best_df["Start_Time"].dt.year.value_counts()
+    year_accidents_count_df = pd.DataFrame(year_accidents_count)
+    year_accidents_count_fig = px.bar(year_accidents_count,
+                                      x=year_accidents_count.index,
+                                      y="Start_Time",
+                                      labels={"index": "Year", "Start_Time": "Counts"},
+                                      text="Start_Time")
+    year_accidents_count_fig.update_layout(
+        autosize=False,
+        width=800,
+        height=600,
+        title={
+            'text': "Accidents yearly change",
+            'y': 0.95,
+            'x': 0.5,
+            'font': {'size': 24},
+            'xanchor': 'center',
+            'yanchor': 'top'})
+    year_accidents_count_fig.show()
+
+
 # # 3.3. Time Analysis
 # # 3.3.1. Accidents yearly change
 #
