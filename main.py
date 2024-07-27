@@ -1,5 +1,5 @@
 # Import packages
-
+import eli5
 ## Basic data processing
 import numpy as np
 import pandas as pd
@@ -7,6 +7,7 @@ import pandas as pd
 ## Data Visualization
 import seaborn as sns
 import matplotlib.pyplot as plt
+from sklearn.metrics import ConfusionMatrixDisplay
 
 import plotly.graph_objects as go
 import plotly.express as px
@@ -1137,3 +1138,630 @@ def visualize_categorical_feature_correlation():
 
 # Show the heatmap
 visualize_categorical_feature_correlation()
+
+
+# 5. Modelling
+## 5.1. Workflow Demonstration
+## 5.1.1. End-Time Prediction
+# Train/Test Split
+X_reg = data_modelling_df.drop(["Severity", "Duration"], axis=1)
+Y_reg = data_modelling_df.Duration
+x_train_reg, x_test_reg, y_train_reg, y_test_reg = train_test_split(X_reg, Y_reg, test_size = 0.3, random_state=0)
+print(f'Train Reg: {x_train_reg.shape} \n Test Reg: {x_test_reg.shape}')
+reg_feature_names = x_train_reg.columns.tolist()
+
+# Store the information for Adj R2.
+# Adjusted R-squared can be negative when R-squared is close to zero.
+# Adjusted R-squared value always be less than or equal to R-squared value.
+# http://net-informations.com/ds/psa/adjusted.htm
+'''
+Description: Calculate Adj R2 for Regression
+Args:
+    test_data: The test dataset(only feature)
+    r2_score: r2 score of the model
+Return: adj_r2_score
+'''
+def adj_r2(test_data, r2_score):
+    records_num = test_data.shape[0]
+    feature_num = test_data.shape[1]
+    adj_r2_score = 1 - ((records_num - 1) / (records_num - feature_num - 1) * (1 - r2_score))
+    return adj_r2_score
+
+# 5.1.1.1. Linear Regression
+# Linear Regression
+lreg = LinearRegression(fit_intercept=False, normalize=True).fit(x_train_reg, y_train_reg)
+lreg_predictions = lreg.predict(x_test_reg)
+lreg_rmse = mean_squared_error(y_test_reg, lreg_predictions, squared=False)
+lreg_r2 = r2_score(y_test_reg, lreg_predictions)
+lreg_adj_r2 = adj_r2(x_test_reg, lreg_r2)
+print(f'RMSE: {lreg_rmse} \n R2: {lreg_r2} \n Adj_R2: {lreg_adj_r2}')
+# Show feature importance as a table
+eli5.show_weights(lreg, feature_names = reg_feature_names)
+
+
+# 5.1.1.2. Support Vector Machine
+# SVR
+sv_reg = SVR(C=10, gamma=1).fit(x_train_reg, y_train_reg)
+sv_reg_predictions = sv_reg.predict(x_test_reg)
+sv_reg_rmse = mean_squared_error(y_test_reg, sv_reg_predictions, squared=False)
+sv_reg_r2 = r2_score(y_test_reg, sv_reg_predictions)
+sv_reg_adj_r2 = adj_r2(x_test_reg, sv_reg_r2)
+print(f'RMSE: {sv_reg_rmse} \n R2: {sv_reg_r2} \n Adj_R2: {sv_reg_adj_r2}')
+# Show feature importance as a table
+#eli5.show_weights(sv_reg, feature_names = reg_feature_names)
+
+# 5.1.1.3. Decision Tree
+# Decision Tree
+dt_reg = DecisionTreeRegressor(random_state=0).fit(x_train_reg, y_train_reg)
+dt_reg_predictions = dt_reg.predict(x_test_reg)
+dt_reg_rmse = mean_squared_error(y_test_reg, dt_reg_predictions, squared=False)
+dt_reg_r2 = r2_score(y_test_reg, dt_reg_predictions)
+dt_reg_adj_r2 = adj_r2(x_test_reg, dt_reg_r2)
+print(f'RMSE: {dt_reg_rmse} \n R2: {dt_reg_r2} \n Adj_R2: {dt_reg_adj_r2}')
+# Show feature importance as a table
+eli5.show_weights(dt_reg, feature_names = reg_feature_names)
+
+# Get the feature importance as a dataframe
+def visualize_decision_tree_feature_importance():
+    # Get the feature importance as a dataframe
+    dt_reg_importances_df = pd.DataFrame(pd.Series(dt_reg.feature_importances_, index=X_reg.columns),
+                                         columns=['Importance']).sort_values('Importance', ascending=False)
+    # Visualize the feature importance of the trained tree
+    plt.figure(figsize=(15, 10))
+    missing_value_graph = sns.barplot(y=dt_reg_importances_df.index, x="Importance", data=dt_reg_importances_df,
+                                      orient="h")
+    missing_value_graph.set_title("Feature importance by Decision Tree Regression", fontsize=20)
+    missing_value_graph.set_ylabel("Features")
+    plt.show()
+
+
+visualize_decision_tree_feature_importance()
+
+# 5.1.1.4. Gradient Boosting Tree
+# Gradient Boosting Regression
+gbt_reg = GradientBoostingRegressor(learning_rate=0.1, max_depth=20, min_impurity_decrease=0.1, min_samples_leaf=10, n_estimators=200, random_state=0).fit(x_train_reg, y_train_reg)
+gbt_reg_predictions = gbt_reg.predict(x_test_reg)
+gbt_reg_rmse = mean_squared_error(y_test_reg, gbt_reg_predictions, squared=False)
+gbt_reg_r2 = r2_score(y_test_reg, gbt_reg_predictions)
+gbt_reg_adj_r2 = adj_r2(x_test_reg, gbt_reg_r2)
+print(f'RMSE: {gbt_reg_rmse} \n R2: {gbt_reg_r2} \n Adj_R2: {gbt_reg_adj_r2}')
+# Show feature importance as a table
+eli5.show_weights(gbt_reg, feature_names = reg_feature_names)
+
+
+def visualize_gbt_feature_importance():
+    # https://scikit-learn.org/stable/auto_examples/ensemble/plot_forest_importances.html
+    # Calculate Standard Deviation of each feature for all the trees
+    gbt_reg_importances_std = np.std([tree[0].feature_importances_ for tree in gbt_reg.estimators_], axis=0)
+    gbt_reg_importances = pd.Series(gbt_reg.feature_importances_, index=X_reg.columns)
+    gbt_reg_importances_df = pd.DataFrame(gbt_reg_importances, columns=['Importance'])
+    gbt_reg_importances_df['Std'] = gbt_reg_importances_std
+    gbt_reg_importances_df.sort_values('Importance', ascending=True, inplace=True)
+    fig, ax = plt.subplots(figsize=(15, 10))
+    gbt_reg_importances_df['Importance'].plot.barh(xerr=gbt_reg_importances_df['Std'], color='cornflowerblue', ax=ax)
+    ax.set_title("Feature importances using MDI of Gradient Boosting Regression", fontsize=22)
+    ax.set_xlabel("Mean decrease in impurity")
+    fig.tight_layout()
+    plt.show()
+
+
+visualize_gbt_feature_importance()
+
+# 5.1.1.5. Random Forest
+# Random Forest Regression
+rf_reg = RandomForestRegressor(random_state=0).fit(x_train_reg, y_train_reg)
+rf_reg_predictions = rf_reg.predict(x_test_reg)
+rf_reg_rmse = mean_squared_error(y_test_reg, rf_reg_predictions, squared=False)
+rf_reg_r2 = r2_score(y_test_reg, rf_reg_predictions)
+rf_reg_adj_r2 = adj_r2(x_test_reg, rf_reg_r2)
+print(f'RMSE: {rf_reg_rmse} \n R2: {rf_reg_r2} \n Adj_R2: {rf_reg_adj_r2}')
+# Show feature importance as a table
+eli5.show_weights(rf_reg, feature_names = reg_feature_names)
+
+
+def visualize_rf_feature_importance():
+    rf_reg_importances_std = np.std([tree.feature_importances_ for tree in rf_reg.estimators_], axis=0)
+    rf_reg_importances = pd.Series(rf_reg.feature_importances_, index=X_reg.columns)
+    rf_reg_importances_df = pd.DataFrame(rf_reg_importances, columns=['Importance'])
+    rf_reg_importances_df['Std'] = rf_reg_importances_std
+    rf_reg_importances_df.sort_values('Importance', ascending=True, inplace=True)
+    fig, ax = plt.subplots(figsize=(15, 10))
+    rf_reg_importances_df['Importance'].plot.barh(xerr=rf_reg_importances_df['Std'], color='cornflowerblue', ax=ax)
+    ax.set_title("Feature importances using MDI of Random Forest Regression", fontsize=22)
+    ax.set_xlabel("Mean decrease in impurity")
+    fig.tight_layout()
+    plt.show()
+
+
+# https://scikit-learn.org/stable/auto_examples/ensemble/plot_forest_importances.html
+# Calculate Standard Deviation of each feature for all the trees
+visualize_rf_feature_importance()
+
+
+# 5.1.1.6. XGBoost
+# XGB Regression
+xgb_reg = XGBRegressor(learning_rate=0.1, max_depth=30, n_estimators=50, random_state=0).fit(x_train_reg, y_train_reg)
+xgb_reg_predictions = xgb_reg.predict(x_test_reg)
+xgb_reg_rmse = mean_squared_error(y_test_reg, xgb_reg_predictions, squared=False)
+xgb_reg_r2 = r2_score(y_test_reg, xgb_reg_predictions)
+xgb_reg_adj_r2 = adj_r2(x_test_reg, xgb_reg_r2)
+print(f'RMSE: {xgb_reg_rmse} \n R2: {xgb_reg_r2} \n Adj_R2: {xgb_reg_adj_r2}')
+# Show feature importance as a table
+eli5.show_weights(xgb_reg, feature_names = reg_feature_names)
+
+
+def visualize_xgb_feature_importance():
+    xgb_reg_importances_df = pd.DataFrame(pd.Series(xgb_reg.feature_importances_, index=X_reg.columns),
+                                          columns=['Importance']).sort_values('Importance', ascending=False)
+    # Visualize the feature importance of the trained tree
+    plt.figure(figsize=(15, 10))
+    missing_value_graph = sns.barplot(y=xgb_reg_importances_df.index, x="Importance", data=xgb_reg_importances_df,
+                                      orient="h")
+    missing_value_graph.set_title("Feature importance by XGB Regression", fontsize=20)
+    missing_value_graph.set_ylabel("Features")
+    plt.show()
+
+
+# Get the feature importance as a dataframe
+visualize_xgb_feature_importance()
+
+# 5.1.1.7. Multi-layer Perceptron Regression
+# Multi-layer Perceptron regressor.
+mlpr_reg = MLPRegressor(learning_rate='invscaling', hidden_layer_sizes=(50, 75, 100), random_state=0).fit(x_train_reg, y_train_reg)
+mlpr_reg_predictions = mlpr_reg.predict(x_test_reg)
+mlpr_reg_rmse = mean_squared_error(y_test_reg, mlpr_reg_predictions, squared=False)
+mlpr_reg_r2 = r2_score(y_test_reg, mlpr_reg_predictions)
+mlpr_reg_adj_r2 = adj_r2(x_test_reg, mlpr_reg_r2)
+print(f'RMSE: {mlpr_reg_rmse} \n R2: {mlpr_reg_r2} \n Adj_R2: {mlpr_reg_adj_r2}')
+
+
+# 5.1.1.8. Model Comparison
+# Gather all the Regression performance in one table
+reg_results = pd.DataFrame([(lreg_rmse, lreg_r2, lreg_adj_r2), (sv_reg_rmse, sv_reg_r2, sv_reg_adj_r2), (dt_reg_rmse, dt_reg_r2, dt_reg_adj_r2), (gbt_reg_rmse, gbt_reg_r2, gbt_reg_adj_r2), (rf_reg_rmse, rf_reg_r2, rf_reg_adj_r2), (xgb_reg_rmse, xgb_reg_r2, xgb_reg_adj_r2), (mlpr_reg_rmse, mlpr_reg_r2, mlpr_reg_adj_r2)],
+             columns=['RMSE','R2','Adj_R2'],
+             index= ['Linear Regression',
+                    'Support Vector Machine',
+                    'Decision Tree',
+                    'Gradient Boosting Tree',
+                    'Random Forest',
+                    'XGBoost',
+                    'Multi-layer Perceptron'])
+reg_results.sort_values(by=['RMSE'])
+
+
+# 5.1.2. Severity Prediction
+# Train/Test Split
+X_cla = data_modelling_df.drop("Severity", axis=1)
+Y_cla = data_modelling_df.Severity
+x_train_cla, x_test_cla, y_train_cla, y_test_cla = train_test_split(X_cla, Y_cla, test_size = 0.3, random_state=0, stratify=Y_cla)
+print(f'Train Cla: {x_train_cla.shape} \n Test Cla: {x_test_cla.shape}')
+cla_feature_names = x_train_cla.columns.tolist()
+
+
+
+# https://scikit-learn.org/stable/modules/generated/sklearn.metrics.plot_confusion_matrix.html#sklearn.metrics.plot_confusion_matrix
+# normalize must be one of {'true', 'pred', 'all', None}
+'''
+Description: Plot the confusion matrix
+Args:
+    classifier: The classifier
+Return: None
+'''
+def draw_confusion_matrix(classifier):
+    fig, ax = plt.subplots(figsize=(12, 6))
+    ConfusionMatrixDisplay(classifier, x_test_cla, y_test_cla, cmap=plt.cm.Blues, normalize=None, ax=ax)
+    ax.set_title("Confusion Matrix", fontsize = 15)
+    plt.show()
+
+# 5.1.2.1. Logistic Regression
+# Logistic Regression
+logistic_reg = LogisticRegression(C=10, fit_intercept=False, solver='liblinear')
+logistic_reg.fit(x_train_cla, y_train_cla)
+logistic_reg_predictions = logistic_reg.predict(x_test_cla)
+logistic_reg_results = classification_report(y_test_cla, logistic_reg_predictions, zero_division=True, output_dict=True)
+
+# Confusion matrix and Classification report
+draw_confusion_matrix(logistic_reg)
+print(classification_report(y_test_cla, logistic_reg_predictions, zero_division=True))
+
+# balanced_accuracy
+# https://scikit-learn.org/stable/modules/generated/sklearn.metrics.balanced_accuracy_score.html#sklearn.metrics.balanced_accuracy_score
+logistic_balanced_accuracy = balanced_accuracy_score(y_test_cla, logistic_reg_predictions)
+print(f'balanced_accuracy: {logistic_balanced_accuracy}')
+
+# ROC_AUC score
+# https://scikit-learn.org/stable/modules/generated/sklearn.metrics.roc_auc_score.html#sklearn.metrics.roc_auc_score
+logistic_roc_ovo_macro = roc_auc_score(y_test_cla, logistic_reg.predict_proba(x_test_cla), multi_class='ovo', average='macro') #Insensitive to class imbalance when average == 'macro'
+logistic_roc_ovr_weighted = roc_auc_score(y_test_cla, logistic_reg.predict_proba(x_test_cla), multi_class='ovr', average='weighted') #Sensitive to class imbalance even when average == 'macro'
+print(f"roc_ovo_macro: {logistic_roc_ovo_macro}")
+print(f"roc_ovr_weighted: {logistic_roc_ovr_weighted}")
+
+# Show feature importance as a table
+eli5.show_weights(logistic_reg, feature_names = cla_feature_names)
+
+
+# 5.1.2.2. Support Vector Machine
+# SVC
+sv_cla = SVC(C=10, gamma=0.1, probability=True, kernel='rbf')
+sv_cla.fit(x_train_cla, y_train_cla)
+sv_cla_predictions = sv_cla.predict(x_test_cla)
+sv_cla_results = classification_report(y_test_cla, sv_cla_predictions, zero_division=True, output_dict=True)
+
+# Confusion matrix and Classification report
+draw_confusion_matrix(sv_cla)
+print(classification_report(y_test_cla, sv_cla_predictions, zero_division=True))
+
+# balanced_accuracy
+# https://scikit-learn.org/stable/modules/generated/sklearn.metrics.balanced_accuracy_score.html#sklearn.metrics.balanced_accuracy_score
+sv_cla_balanced_accuracy = balanced_accuracy_score(y_test_cla, sv_cla_predictions)
+print(f'balanced_accuracy: {sv_cla_balanced_accuracy}')
+
+# ROC_AUC score
+# https://scikit-learn.org/stable/modules/generated/sklearn.metrics.roc_auc_score.html#sklearn.metrics.roc_auc_score
+sv_cla_roc_ovo_macro = roc_auc_score(y_test_cla, sv_cla.predict_proba(x_test_cla), multi_class='ovo', average='macro') #Insensitive to class imbalance when average == 'macro'
+sv_cla_roc_ovr_weighted = roc_auc_score(y_test_cla, sv_cla.predict_proba(x_test_cla), multi_class='ovr', average='weighted') #Sensitive to class imbalance even when average == 'macro'
+print(f"roc_ovo_macro: {sv_cla_roc_ovo_macro}")
+print(f"roc_ovr_weighted: {sv_cla_roc_ovr_weighted}")
+
+# Show feature importance as a table
+#eli5.show_weights(sv_cla, feature_names = cla_feature_names)
+
+
+# 5.1.2.3. Decision Tree
+# Decision Tree Classification
+dt_cla = DecisionTreeClassifier(random_state=0)
+dt_cla.fit(x_train_cla, y_train_cla)
+dt_cla_predictions = dt_cla.predict(x_test_cla)
+dt_cla_results = classification_report(y_test_cla, dt_cla_predictions, zero_division=True, output_dict=True)
+
+# Confusion matrix and Classification report
+draw_confusion_matrix(dt_cla)
+print(classification_report(y_test_cla, dt_cla_predictions, zero_division=True))
+
+# balanced_accuracy
+# https://scikit-learn.org/stable/modules/generated/sklearn.metrics.balanced_accuracy_score.html#sklearn.metrics.balanced_accuracy_score
+dt_cla_balanced_accuracy = balanced_accuracy_score(y_test_cla, dt_cla_predictions)
+print(f'balanced_accuracy: {dt_cla_balanced_accuracy}')
+
+# ROC_AUC score
+# https://scikit-learn.org/stable/modules/generated/sklearn.metrics.roc_auc_score.html#sklearn.metrics.roc_auc_score
+dt_cla_roc_ovo_macro = roc_auc_score(y_test_cla, dt_cla.predict_proba(x_test_cla), multi_class='ovo', average='macro') #Insensitive to class imbalance when average == 'macro'
+dt_cla_roc_ovr_weighted = roc_auc_score(y_test_cla, dt_cla.predict_proba(x_test_cla), multi_class='ovr', average='weighted') #Sensitive to class imbalance even when average == 'macro'
+print(f"roc_ovo_macro: {dt_cla_roc_ovo_macro}")
+print(f"roc_ovr_weighted: {dt_cla_roc_ovr_weighted}")
+
+# Show feature importance as a table
+eli5.show_weights(dt_cla, feature_names = cla_feature_names)
+
+
+def visualize_decision_tree_feature_importance_cla():
+    dt_cla_importances_df = pd.DataFrame(pd.Series(dt_cla.feature_importances_, index=X_cla.columns),
+                                         columns=['Importance']).sort_values('Importance', ascending=False)
+    # Visualize the feature importance of the trained tree
+    plt.figure(figsize=(15, 10))
+    missing_value_graph = sns.barplot(y=dt_cla_importances_df.index, x="Importance", data=dt_cla_importances_df,
+                                      orient="h")
+    missing_value_graph.set_title("Feature importance by Decision Tree Classification", fontsize=20)
+    missing_value_graph.set_ylabel("Features")
+    plt.show()
+
+
+# Get the feature importance as a dataframe
+visualize_decision_tree_feature_importance_cla()
+
+
+# https://scikit-learn.org/stable/modules/generated/sklearn.tree.export_graphviz.html
+dt_cla_graph = export_graphviz(dt_cla, out_file=None, max_depth=2, filled=True, feature_names=cla_feature_names)
+graphviz.Source(dt_cla_graph)
+
+
+def visualize_pdp_dt_classification():
+    # 1-D pdp plot
+    dt_cla_pdp_goals = pdp.pdp_isolate(model=dt_cla, dataset=x_test_cla, model_features=cla_feature_names,
+                                       feature='Duration')
+    # plot it
+    pdp.pdp_plot(dt_cla_pdp_goals, 'Duration')
+    plt.show()
+
+
+visualize_pdp_dt_classification()
+
+
+def visualize_2D_pdp_dt_classification():
+    # 2D Partial Dependence Plots
+    features_to_plot = ['Start_Lng', 'Start_Lat']
+    dt_cla_pdp_2D = pdp.pdp_interact(model=dt_cla, dataset=x_test_cla, model_features=cla_feature_names,
+                                     features=features_to_plot)
+    pdp.pdp_interact_plot(pdp_interact_out=dt_cla_pdp_2D, feature_names=features_to_plot, plot_type='contour')
+    plt.show()
+
+
+visualize_2D_pdp_dt_classification()
+
+
+# 5.1.2.4. Gradient Boost Tree
+# Gradient Boosting Classification
+gbt_cla = GradientBoostingClassifier(learning_rate=0.1, max_depth=10, min_impurity_decrease=0.1, min_samples_leaf=2, n_estimators=100, random_state=0)
+gbt_cla.fit(x_train_cla, y_train_cla)
+gbt_cla_predictions = gbt_cla.predict(x_test_cla)
+gbt_cla_results = classification_report(y_test_cla, gbt_cla_predictions, zero_division=True, output_dict=True)
+
+# Confusion matrix and Classification report
+draw_confusion_matrix(gbt_cla)
+print(classification_report(y_test_cla, gbt_cla_predictions, zero_division=True))
+
+# balanced_accuracy
+# https://scikit-learn.org/stable/modules/generated/sklearn.metrics.balanced_accuracy_score.html#sklearn.metrics.balanced_accuracy_score
+gbt_cla_balanced_accuracy = balanced_accuracy_score(y_test_cla, gbt_cla_predictions)
+print(f'balanced_accuracy: {gbt_cla_balanced_accuracy}')
+
+# ROC_AUC score
+# https://scikit-learn.org/stable/modules/generated/sklearn.metrics.roc_auc_score.html#sklearn.metrics.roc_auc_score
+gbt_cla_roc_ovo_macro = roc_auc_score(y_test_cla, gbt_cla.predict_proba(x_test_cla), multi_class='ovo', average='macro') #Insensitive to class imbalance when average == 'macro'
+gbt_cla_roc_ovr_weighted = roc_auc_score(y_test_cla, gbt_cla.predict_proba(x_test_cla), multi_class='ovr', average='weighted') #Sensitive to class imbalance even when average == 'macro'
+print(f"roc_ovo_macro: {gbt_cla_roc_ovo_macro}")
+print(f"roc_ovr_weighted: {gbt_cla_roc_ovr_weighted}")
+# Show feature importance as a table
+eli5.show_weights(gbt_cla, feature_names = cla_feature_names)
+
+
+def visualize_gbt_cla_feature_importance():
+    gbt_cla_importances_std = np.std([tree[0].feature_importances_ for tree in gbt_cla.estimators_], axis=0)
+    gbt_cla_importances = pd.Series(gbt_cla.feature_importances_, index=X_cla.columns)
+    gbt_cla_importances_df = pd.DataFrame(gbt_cla_importances, columns=['Importance'])
+    gbt_cla_importances_df['Std'] = gbt_cla_importances_std
+    gbt_cla_importances_df.sort_values('Importance', ascending=True, inplace=True)
+    fig, ax = plt.subplots(figsize=(15, 10))
+    gbt_cla_importances_df['Importance'].plot.barh(xerr=gbt_cla_importances_df['Std'], color='cornflowerblue', ax=ax)
+    ax.set_title("Feature importances using MDI of Gradient Boosting Classification", fontsize=22)
+    ax.set_xlabel("Mean decrease in impurity")
+    fig.tight_layout()
+    plt.show()
+
+
+# https://scikit-learn.org/stable/auto_examples/ensemble/plot_forest_importances.html
+# Calculate Standard Deviation of each feature for all the trees
+visualize_gbt_cla_feature_importance()
+
+
+# 5.1.2.5. Random Forest
+# Random Forest Classification
+rf_cla = RandomForestClassifier(random_state=0)
+rf_cla.fit(x_train_cla, y_train_cla)
+rf_cla_predictions = rf_cla.predict(x_test_cla)
+rf_cla_results = classification_report(y_test_cla, rf_cla_predictions, zero_division=True, output_dict=True)
+
+# Confusion matrix and Classification report
+draw_confusion_matrix(rf_cla)
+print(classification_report(y_test_cla, rf_cla_predictions, zero_division=True))
+
+# balanced_accuracy
+# https://scikit-learn.org/stable/modules/generated/sklearn.metrics.balanced_accuracy_score.html#sklearn.metrics.balanced_accuracy_score
+rf_cla_balanced_accuracy = balanced_accuracy_score(y_test_cla, rf_cla_predictions)
+print(f'balanced_accuracy: {rf_cla_balanced_accuracy}')
+
+# ROC_AUC score
+# https://scikit-learn.org/stable/modules/generated/sklearn.metrics.roc_auc_score.html#sklearn.metrics.roc_auc_score
+rf_cla_roc_ovo_macro = roc_auc_score(y_test_cla, rf_cla.predict_proba(x_test_cla), multi_class='ovo', average='macro') #Insensitive to class imbalance when average == 'macro'
+rf_cla_roc_ovr_weighted = roc_auc_score(y_test_cla, rf_cla.predict_proba(x_test_cla), multi_class='ovr', average='weighted') #Sensitive to class imbalance even when average == 'macro'
+print(f"roc_ovo_macro: {rf_cla_roc_ovo_macro}")
+print(f"roc_ovr_weighted: {rf_cla_roc_ovr_weighted}")
+# Show feature importance as a table
+eli5.show_weights(rf_cla, feature_names = cla_feature_names)
+
+
+def visualize_rf_cla_feature_importance():
+    rf_cla_importances_std = np.std([tree.feature_importances_ for tree in rf_cla.estimators_], axis=0)
+    rf_cla_importances = pd.Series(rf_cla.feature_importances_, index=X_cla.columns)
+    rf_cla_importances_df = pd.DataFrame(rf_cla_importances, columns=['Importance'])
+    rf_cla_importances_df['Std'] = rf_cla_importances_std
+    rf_cla_importances_df.sort_values('Importance', ascending=True, inplace=True)
+    fig, ax = plt.subplots(figsize=(15, 10))
+    rf_cla_importances_df['Importance'].plot.barh(xerr=rf_cla_importances_df['Std'], color='cornflowerblue', ax=ax)
+    ax.set_title("Feature importances using MDI of Random Forest Classification", fontsize=22)
+    ax.set_xlabel("Mean decrease in impurity")
+    fig.tight_layout()
+    plt.show()
+
+
+# https://scikit-learn.org/stable/auto_examples/ensemble/plot_forest_importances.html
+# Calculate Standard Deviation of each feature for all the trees
+visualize_rf_cla_feature_importance()
+
+
+# 5.1.2.6. XGBoost
+# XGB Classification
+# https://xgboost.readthedocs.io/en/latest/python/python_api.html#module-xgboost.sklearn
+xgb_cla = XGBClassifier(learning_rate=0.3, max_depth=20, n_estimators=100, eval_metric='mlogloss', random_state=0)
+xgb_cla.fit(x_train_cla, y_train_cla)
+xgb_cla_predictions = xgb_cla.predict(x_test_cla)
+xgb_cla_results = classification_report(y_test_cla, xgb_cla_predictions, zero_division=True, output_dict=True)
+
+# Confusion matrix and Classification report
+draw_confusion_matrix(xgb_cla)
+print(classification_report(y_test_cla, xgb_cla_predictions, zero_division=True))
+
+# balanced_accuracy
+# https://scikit-learn.org/stable/modules/generated/sklearn.metrics.balanced_accuracy_score.html#sklearn.metrics.balanced_accuracy_score
+xgb_cla_balanced_accuracy = balanced_accuracy_score(y_test_cla, xgb_cla_predictions)
+print(f'balanced_accuracy: {xgb_cla_balanced_accuracy}')
+
+# ROC_AUC score
+# https://scikit-learn.org/stable/modules/generated/sklearn.metrics.roc_auc_score.html#sklearn.metrics.roc_auc_score
+xgb_cla_roc_ovo_macro = roc_auc_score(y_test_cla, xgb_cla.predict_proba(x_test_cla), multi_class='ovo', average='macro') #Insensitive to class imbalance when average == 'macro'
+xgb_cla_roc_ovr_weighted = roc_auc_score(y_test_cla, xgb_cla.predict_proba(x_test_cla), multi_class='ovr', average='weighted') #Sensitive to class imbalance even when average == 'macro'
+print(f"roc_ovo_macro: {xgb_cla_roc_ovo_macro}")
+print(f"roc_ovr_weighted: {xgb_cla_roc_ovr_weighted}")
+# Show feature importance as a table
+eli5.show_weights(xgb_cla, feature_names = cla_feature_names)
+
+
+def visualize_xgb_cla_feature_importance():
+    xgb_cla_importances_df = pd.DataFrame(pd.Series(xgb_cla.feature_importances_, index=X_cla.columns),
+                                          columns=['Importance']).sort_values('Importance', ascending=False)
+    # Visualize the feature importance of the trained tree
+    plt.figure(figsize=(15, 10))
+    missing_value_graph = sns.barplot(y=xgb_cla_importances_df.index, x="Importance", data=xgb_cla_importances_df,
+                                      orient="h")
+    missing_value_graph.set_title("Feature importance by XGB Classification", fontsize=20)
+    missing_value_graph.set_ylabel("Features")
+    plt.show()
+
+
+# Get the feature importance as a dataframe
+visualize_xgb_cla_feature_importance()
+
+
+def visualize_xgb_cla_pdp_crossing():
+    # 1-D pdp plot
+    xgb_cla_pdp_goals = pdp.pdp_isolate(model=xgb_cla, dataset=x_test_cla, model_features=cla_feature_names,
+                                        feature='Crossing')
+    # plot it
+    pdp.pdp_plot(xgb_cla_pdp_goals, 'Crossing')
+    plt.show()
+
+
+visualize_xgb_cla_pdp_crossing()
+
+
+def visualize_xgb_cla_pdp_2d():
+    # 2D Partial Dependence Plots
+    features_to_plot = ['Side', 'Duration']
+    xgb_cla_pdp_2D = pdp.pdp_interact(model=xgb_cla, dataset=x_test_cla, model_features=cla_feature_names,
+                                      features=features_to_plot)
+    pdp.pdp_interact_plot(pdp_interact_out=xgb_cla_pdp_2D, feature_names=features_to_plot, plot_type='contour')
+    plt.show()
+
+
+visualize_xgb_cla_pdp_2d()
+
+# 5.1.2.7. Multi-layer Perceptron Classification
+# Multi-layer Perceptron classifier.
+mlpc_cla = MLPClassifier(activation='tanh', hidden_layer_sizes=(100, 100), learning_rate='invscaling', random_state = 0)
+mlpc_cla.fit(x_train_cla, y_train_cla)
+mlpc_cla_predictions = mlpc_cla.predict(x_test_cla)
+mlpc_cla_results = classification_report(y_test_cla, mlpc_cla_predictions, zero_division=True, output_dict=True)
+
+# Confusion matrix and Classification report
+draw_confusion_matrix(mlpc_cla)
+print(classification_report(y_test_cla, mlpc_cla_predictions, zero_division=True))
+
+# balanced_accuracy
+# https://scikit-learn.org/stable/modules/generated/sklearn.metrics.balanced_accuracy_score.html#sklearn.metrics.balanced_accuracy_score
+mlpc_cla_balanced_accuracy = balanced_accuracy_score(y_test_cla, mlpc_cla_predictions)
+print(f'balanced_accuracy: {mlpc_cla_balanced_accuracy}')
+
+# ROC_AUC score
+# https://scikit-learn.org/stable/modules/generated/sklearn.metrics.roc_auc_score.html#sklearn.metrics.roc_auc_score
+mlpc_cla_roc_ovo_macro = roc_auc_score(y_test_cla, mlpc_cla.predict_proba(x_test_cla), multi_class='ovo', average='macro') #Insensitive to class imbalance when average == 'macro'
+mlpc_cla_roc_ovr_weighted = roc_auc_score(y_test_cla, mlpc_cla.predict_proba(x_test_cla), multi_class='ovr', average='weighted') #Sensitive to class imbalance even when average == 'macro'
+print(f"roc_ovo_macro: {mlpc_cla_roc_ovo_macro}")
+print(f"roc_ovr_weighted: {mlpc_cla_roc_ovr_weighted}")
+
+
+
+# 5.1.2.8. Model Comparison
+# Gather all the classification performance in one table
+cla_results = pd.DataFrame([
+    (logistic_balanced_accuracy, logistic_reg_results['accuracy'], logistic_reg_results['weighted avg']['precision'], logistic_reg_results['weighted avg']['recall'], logistic_reg_results['weighted avg']['f1-score'], logistic_roc_ovo_macro, logistic_roc_ovr_weighted),
+    (sv_cla_balanced_accuracy, sv_cla_results['accuracy'], sv_cla_results['weighted avg']['precision'], sv_cla_results['weighted avg']['recall'], sv_cla_results['weighted avg']['f1-score'], sv_cla_roc_ovo_macro, sv_cla_roc_ovr_weighted),
+    (dt_cla_balanced_accuracy, dt_cla_results['accuracy'], dt_cla_results['weighted avg']['precision'], dt_cla_results['weighted avg']['recall'], dt_cla_results['weighted avg']['f1-score'], dt_cla_roc_ovo_macro, dt_cla_roc_ovr_weighted),
+    (gbt_cla_balanced_accuracy, gbt_cla_results['accuracy'], gbt_cla_results['weighted avg']['precision'], gbt_cla_results['weighted avg']['recall'], gbt_cla_results['weighted avg']['f1-score'], gbt_cla_roc_ovo_macro, gbt_cla_roc_ovr_weighted),
+    (rf_cla_balanced_accuracy, rf_cla_results['accuracy'], rf_cla_results['weighted avg']['precision'], rf_cla_results['weighted avg']['recall'], rf_cla_results['weighted avg']['f1-score'], rf_cla_roc_ovo_macro, rf_cla_roc_ovr_weighted),
+    (xgb_cla_balanced_accuracy, xgb_cla_results['accuracy'], xgb_cla_results['weighted avg']['precision'], xgb_cla_results['weighted avg']['recall'], xgb_cla_results['weighted avg']['f1-score'], xgb_cla_roc_ovo_macro, xgb_cla_roc_ovr_weighted),
+    (mlpc_cla_balanced_accuracy, mlpc_cla_results['accuracy'], mlpc_cla_results['weighted avg']['precision'], mlpc_cla_results['weighted avg']['recall'], mlpc_cla_results['weighted avg']['f1-score'], mlpc_cla_roc_ovo_macro, mlpc_cla_roc_ovr_weighted)],
+    columns=['Accuracy(Balanced)', 'Accuracy','Precision(Weighted_avg)', 'Recall(Weighted_avg)', 'F1-score(Weighted_avg)', 'Roc_ovo(macro)', 'Roc_ovr(weighted)'],
+    index= ['Logistics Regression',
+            'Support Vector Machine',
+            'Decision Tree',
+            'Gradient Boosting Tree',
+            'Random Forest',
+            'XGBoost',
+            'Multi-layer Perceptron'])
+
+cla_results.sort_values(by=['F1-score(Weighted_avg)'], ascending=False)
+
+
+# 5.1.2.9. Deal with Imbalanced data
+# Form the train data for sampling
+train_cla_df = pd.concat([x_train_cla, y_train_cla], axis=1)
+
+# Over-sampling and Under-sampling
+size_l = len(train_cla_df[train_cla_df["Severity"]==2].index)
+size_s = len(train_cla_df[train_cla_df["Severity"]==1].index)
+
+train_cla_over = pd.DataFrame()
+train_cla_under = pd.DataFrame()
+
+for i in range(1,5):
+    class_df = train_cla_df[train_cla_df["Severity"]==i]
+    train_cla_over = train_cla_over.append(class_df.sample(size_l, random_state=1, replace=True))
+    train_cla_under = train_cla_under.append(class_df.sample(size_s, random_state=1, replace=False))
+
+print(f'Over-sampling: \n{train_cla_over.Severity.value_counts()}')
+print(f'Under-sampling: \n{train_cla_under.Severity.value_counts()}')
+
+
+# Try on over-sampling data
+# XGB Classification
+xgb_cla = XGBClassifier(learning_rate=0.3, max_depth=20, n_estimators=100, eval_metric='mlogloss', random_state=0)
+xgb_cla.fit(train_cla_over.drop('Severity', axis=1), train_cla_over['Severity'])
+xgb_cla_predictions_over = xgb_cla.predict(x_test_cla)
+
+# Confusion matrix and Classification report
+draw_confusion_matrix(xgb_cla)
+print(classification_report(y_test_cla, xgb_cla_predictions_over, zero_division=True))
+
+
+
+# Try on under-sampling data
+# XGB Classification
+xgb_cla = XGBClassifier(learning_rate=0.3, max_depth=20, n_estimators=100, eval_metric='mlogloss', random_state=0)
+xgb_cla.fit(train_cla_under.drop('Severity', axis=1), train_cla_under['Severity'])
+xgb_cla_predictions_under = xgb_cla.predict(x_test_cla)
+
+# Confusion matrix and Classification report
+draw_confusion_matrix(xgb_cla)
+print(classification_report(y_test_cla, xgb_cla_predictions_under, zero_division=True))
+
+
+# 5.1.2.10. Severity Prediction Visualization
+# Orlando latitude and longitude values
+# https://www.latlong.net/place/orlando-fl-usa-1947.html
+orlando_lat = 28.538336
+orlando_long = -81.379234
+
+# Generate a map of Orlando
+orlando_map = folium.Map(location=[orlando_lat, orlando_long], zoom_start=12)
+
+# Instantiate a mark cluster object for the incidents in the dataframe
+accidents = folium.plugins.MarkerCluster().add_to(orlando_map)
+
+# Loop through the dataframe and add each data point to the mark cluster
+for lat, lng, label in zip(x_test_cla['Start_Lat'], x_test_cla['Start_Lng'], xgb_cla_predictions.astype(str)):
+    if label == '4':
+        folium.Marker(
+            location=[lat, lng],
+            icon=folium.Icon(color="red", icon="warning-sign"), #https://getbootstrap.com/docs/3.3/components/
+            popup=label,
+            ).add_to(accidents)
+    elif label == '3':
+        folium.Marker(
+            location=[lat, lng],
+            icon=folium.Icon(color="lightred", icon="warning-sign"),
+            popup=label,
+            ).add_to(accidents)
+    elif label == '2':
+        folium.Marker(
+            location=[lat, lng],
+            icon=folium.Icon(color="orange", icon="warning-sign"),
+            popup=label,
+            ).add_to(accidents)
+    elif label == '1':
+        folium.Marker(
+            location=[lat, lng],
+            icon=folium.Icon(color="beige", icon="warning-sign"),
+            popup=label,
+            ).add_to(accidents)
+# Display map
+orlando_map
