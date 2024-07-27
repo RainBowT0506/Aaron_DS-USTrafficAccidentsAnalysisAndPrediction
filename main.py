@@ -1021,3 +1021,119 @@ def visualize_infrastructure_feature_distribution():
 
 # Show the severity distribution of each category(True/False)
 visualize_infrastructure_feature_distribution()
+
+
+# 4. Feature Engineering
+
+## Only choose a city because of the resources limitation.
+data_best_df = data_preprocessed_dropNaN_df[data_preprocessed_dropNaN_df['City'] == 'Orlando'].copy()
+#data_best_df = data_preprocessed_median_df[data_preprocessed_dropNaN_df['City'] == 'Orlando'].copy()
+#data_best_df = data_preprocessed_mean_df[data_preprocessed_dropNaN_df['City'] == 'Orlando'].copy()
+
+# Reset index
+data_best_df.reset_index(inplace=True)
+
+# 4.1. Feature choosing
+# Choose relevant features
+relevant_features = ['Severity', 'Start_Time', 'End_Time', 'Start_Lat', 'Start_Lng','Side',
+       'Temperature(F)', 'Humidity(%)', 'Pressure(in)', 'Visibility(mi)',
+       'Wind_Direction', 'Wind_Speed(mph)', 'Weather_Condition', 'Amenity',
+       'Bump', 'Crossing', 'Give_Way', 'Junction', 'No_Exit', 'Railway',
+       'Roundabout', 'Station', 'Stop', 'Traffic_Calming', 'Traffic_Signal',
+       'Turning_Loop', 'Sunrise_Sunset']
+data_modelling_df = data_best_df[relevant_features].copy()
+
+# Duration = End_Time - Start_Time; Create a new feature for modeling.
+data_modelling_df['Duration'] = (data_modelling_df['End_Time'] - data_modelling_df['Start_Time']).dt.total_seconds() / 3600
+data_modelling_df.drop('End_Time', axis=1, inplace=True)
+
+# Transform Month/week/Hour to different features
+data_modelling_df["Month"] = data_modelling_df["Start_Time"].dt.month
+data_modelling_df["Week"] = data_modelling_df["Start_Time"].dt.dayofweek
+data_modelling_df["Hour"] = data_modelling_df["Start_Time"].dt.hour
+data_modelling_df.drop("Start_Time", axis=1, inplace=True)
+
+# 4.2. One Hot Encoding
+# Select features that are suitable for One Hot Encoding
+one_hot_features = ['Wind_Direction', 'Weather_Condition']
+
+# Wind_Direction Categorizing
+data_modelling_df.loc[data_modelling_df['Wind_Direction'].str.startswith('C'), 'Wind_Direction'] = 'C' #Calm
+data_modelling_df.loc[data_modelling_df['Wind_Direction'].str.startswith('E'), 'Wind_Direction'] = 'E' #East, ESE, ENE
+data_modelling_df.loc[data_modelling_df['Wind_Direction'].str.startswith('W'), 'Wind_Direction'] = 'W' #West, WSW, WNW
+data_modelling_df.loc[data_modelling_df['Wind_Direction'].str.startswith('S'), 'Wind_Direction'] = 'S' #South, SSW, SSE
+data_modelling_df.loc[data_modelling_df['Wind_Direction'].str.startswith('N'), 'Wind_Direction'] = 'N' #North, NNW, NNE
+data_modelling_df.loc[data_modelling_df['Wind_Direction'].str.startswith('V'), 'Wind_Direction'] = 'V' #Variable
+
+# Weather_Condition Categorizing
+# Fair, Cloudy, Clear, Overcast, Snow, Haze, Rain, Thunderstorm, Windy, Hail, Thunder, Dust, Tornado
+data_modelling_df['Weather_Fair'] = np.where(data_modelling_df['Weather_Condition'].str.contains('Fair', case=False, na = False), 1, 0)
+data_modelling_df['Weather_Cloudy'] = np.where(data_modelling_df['Weather_Condition'].str.contains('Cloudy', case=False, na = False), 1, 0)
+data_modelling_df['Weather_Clear'] = np.where(data_modelling_df['Weather_Condition'].str.contains('Clear', case=False, na = False), 1, 0)
+data_modelling_df['Weather_Overcast'] = np.where(data_modelling_df['Weather_Condition'].str.contains('Overcast', case=False, na = False), 1, 0)
+data_modelling_df['Weather_Snow'] = np.where(data_modelling_df['Weather_Condition'].str.contains('Snow|Wintry|Sleet', case=False, na = False), 1, 0)
+data_modelling_df['Weather_Haze'] = np.where(data_modelling_df['Weather_Condition'].str.contains('Smoke|Fog|Mist|Haze', case=False, na = False), 1, 0)
+data_modelling_df['Weather_Rain'] = np.where(data_modelling_df['Weather_Condition'].str.contains('Rain|Drizzle|Showers', case=False, na = False), 1, 0)
+data_modelling_df['Weather_Thunderstorm'] = np.where(data_modelling_df['Weather_Condition'].str.contains('Thunderstorms|T-Storm', case=False, na = False), 1, 0)
+data_modelling_df['Weather_Windy'] = np.where(data_modelling_df['Weather_Condition'].str.contains('Windy|Squalls', case=False, na = False), 1, 0)
+data_modelling_df['Weather_Hail'] = np.where(data_modelling_df['Weather_Condition'].str.contains('Hail|Ice Pellets', case=False, na = False), 1, 0)
+data_modelling_df['Weather_Thunder'] = np.where(data_modelling_df['Weather_Condition'].str.contains('Thunder', case=False, na = False), 1, 0)
+data_modelling_df['Weather_Dust'] = np.where(data_modelling_df['Weather_Condition'].str.contains('Dust', case=False, na = False), 1, 0)
+data_modelling_df['Weather_Tornado'] = np.where(data_modelling_df['Weather_Condition'].str.contains('Tornado', case=False, na = False), 1, 0)
+
+# Transform the one-hot features, then delete them
+onehot_df = pd.get_dummies(data_modelling_df['Wind_Direction'], prefix='Wind')
+data_modelling_df = pd.concat([data_modelling_df, onehot_df], axis=1)
+data_modelling_df.drop(one_hot_features, axis=1, inplace=True)
+
+# 4.3. Label Encoding
+# Select features that are suitable for Label Encoding
+label_encoding_features = ['Side', 'Amenity','Bump', 'Crossing', 'Give_Way', 'Junction', 'No_Exit', 'Railway','Roundabout', 'Station', 'Stop', 'Traffic_Calming', 'Traffic_Signal','Turning_Loop', 'Sunrise_Sunset']
+
+# Label Encoding
+for feature in label_encoding_features:
+    data_modelling_df[feature] = LabelEncoder().fit_transform(data_modelling_df[feature])
+
+data_modelling_df
+
+
+# 4.4. Correlation Analysis
+# Display the correlation table for continuous features
+# https://pandas.pydata.org/pandas-docs/stable/user_guide/style.html
+def style_corr(v, props=''):
+    return props if (v < -0.4 or v > 0.4) and v != 1 else None
+
+continuous_feature = ['Start_Lat', 'Start_Lng', 'Temperature(F)','Humidity(%)', 'Pressure(in)', 'Visibility(mi)', 'Wind_Speed(mph)', 'Duration']
+data_modelling_df[continuous_feature].corr().style.applymap(style_corr, props='color:red;')
+
+
+def visualize_feature_correlation():
+    plt.figure(figsize=(12, 9))
+    sns.heatmap(data_modelling_df[continuous_feature].corr(), cmap="coolwarm", annot=True, fmt='.3f').set_title(
+        'Pearson Correlation for continuous features', fontsize=22)
+    plt.show()
+
+
+# Show the heatmap
+visualize_feature_correlation()
+
+
+# Find the data with all the same value
+unique_counts = data_modelling_df.drop(continuous_feature, axis=1).astype("object").describe().loc['unique']
+feature_all_same = list(unique_counts[unique_counts == 1].index)
+data_modelling_df.drop(feature_all_same, axis=1, inplace=True)
+
+
+# Display the correlation table for categorical features
+data_modelling_df.drop(continuous_feature, axis=1).corr(method='spearman').style.applymap(style_corr, props='color:red;')
+
+
+def visualize_categorical_feature_correlation():
+    plt.figure(figsize=(35, 20))
+    sns.heatmap(data_modelling_df.drop(continuous_feature, axis=1).corr(method='spearman'), cmap="coolwarm", annot=True,
+                fmt='.3f').set_title('Spearman Correlation for categorical features', fontsize=22)
+    plt.show()
+
+
+# Show the heatmap
+visualize_categorical_feature_correlation()
