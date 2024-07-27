@@ -219,6 +219,16 @@ data_best_df = data_preprocessed_dropNaN_df.copy()
 # Reset index
 data_best_df.reset_index(inplace=True)
 
+week_accidents_count = data_best_df["Start_Time"].dt.day_name().value_counts()
+week_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+year_accidents_count = data_best_df["Start_Time"].dt.year.value_counts()
+year_accidents_count_df = pd.DataFrame(year_accidents_count)
+
+# https://hedgescompany.com/automotive-market-research-statistics/auto-mailing-lists-and-marketing/
+registered_vehicles_df = pd.DataFrame(data=[264.0, 270.4, 279.1, 284.5, 286.9], columns=['Numbers(million)'],
+                                      index=[2016, 2017, 2018, 2019, 2020])
+
 # 3. Data Analysis
 # 3.1. Basic Analysis
 
@@ -558,8 +568,6 @@ def visualize_top_10_zipcodes_accidents_by_severity():
 # Top 10 Zipcode with the Most Accidents in a view of severity
 visualize_top_10_zipcodes_accidents_by_severity()
 
-
-
 # 3.2.6. What are the accidents distribution by street Side?
 # Accidents distribution by street Side
 # Set up the matplotlib figure
@@ -582,9 +590,6 @@ def visualize_accident_distribution_by_street_side():
 
 visualize_accident_distribution_by_street_side()
 
-
-year_accidents_count = data_best_df["Start_Time"].dt.year.value_counts()
-year_accidents_count_df = pd.DataFrame(year_accidents_count)
 def visualize_yearly_accident_change():
     year_accidents_count_fig = px.bar(year_accidents_count,
                                       x=year_accidents_count.index,
@@ -610,10 +615,6 @@ def visualize_yearly_accident_change():
 
 # Accidents yearly change
 visualize_yearly_accident_change()
-
-# https://hedgescompany.com/automotive-market-research-statistics/auto-mailing-lists-and-marketing/
-registered_vehicles_df = pd.DataFrame(data=[264.0, 270.4, 279.1, 284.5, 286.9], columns=['Numbers(million)'],
-                                      index=[2016, 2017, 2018, 2019, 2020])
 
 def visualize_yearly_change_in_registered_vehicles():
     registered_vehicles_fig = px.bar(registered_vehicles_df,
@@ -718,10 +719,6 @@ def visualize_monthly_accident_change():
 # 3.3.2. Month
 # Extract Month
 visualize_monthly_accident_change()
-
-week_accidents_count = data_best_df["Start_Time"].dt.day_name().value_counts()
-week_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-
 
 def visualize_weekly_accident_change():
     # 將 week_accidents_count 轉換為數據框並重置索引
@@ -889,4 +886,112 @@ def visualize_mean_duration_per_severity():
 # Calculate the mean Duration of each Severity
 visualize_mean_duration_per_severity()
 
-print()
+
+# 3.4. Environment Analysis
+# 3.4.1. Top 15 Weather_Condition
+def visualize_weather_conditions():
+    fig = plt.figure(figsize=(15, 10))
+    sns.countplot(y='Weather_Condition',
+                  data=data_best_df,
+                  order=data_best_df['Weather_Condition'].value_counts()[:15].index) \
+        .set_title("Top 15 Weather_Condition", fontsize=22)
+    plt.show()
+
+
+# Weather condition
+visualize_weather_conditions()
+
+
+def visualize_weather_severity_means():
+    weather_mean_severity = data_best_df.groupby('Weather_Condition')['Severity'].mean().sort_values(ascending=False)
+    weather_mean_severity_df = pd.DataFrame(weather_mean_severity[:25])
+    plt.figure(figsize=(15, 10))  # Set the figure size
+    weather_mean_severity_graph = sns.barplot(y=weather_mean_severity_df.index, x="Severity",
+                                              data=weather_mean_severity_df, orient="h")
+    weather_mean_severity_graph.set_title("Weather Condition with mean of the severity", fontsize=20)
+    weather_mean_severity_graph.set_ylabel("Weather_Condition")
+
+
+# Weather condition by mean of the Severity
+visualize_weather_severity_means()
+
+# 3.4.2. Top 15 Wind_Direction
+def visualize_wind_directions():
+    fig = plt.figure(figsize=(15, 10))
+    sns.countplot(y='Wind_Direction',
+                  data=data_best_df,
+                  order=data_best_df['Wind_Direction'].value_counts()[:15].index) \
+        .set_title("Top 15 Wind_Direction", fontsize=22)
+    plt.show()
+
+
+visualize_wind_directions()
+
+
+def visualize_wind_severity_means():
+    wind_mean_severity = data_best_df.groupby('Wind_Direction')['Severity'].mean().sort_values(ascending=False)
+    wind_mean_severity_df = pd.DataFrame(wind_mean_severity)
+    plt.figure(figsize=(15, 10))  # Set the figure size
+    wind_mean_severity_graph = sns.barplot(y=wind_mean_severity_df.index, x="Severity", data=wind_mean_severity_df,
+                                           orient="h")
+    wind_mean_severity_graph.set_title("Wind Direction with Mean Severity", fontsize=20)
+    wind_mean_severity_graph.set_xlabel("Mean Severity")
+    wind_mean_severity_graph.set_ylabel("Wind Direction")
+    plt.show()
+
+
+# Wind direction by mean of the Severity
+visualize_wind_severity_means()
+
+# 3.4.3. Environment Attribute(numerical) distribution and the relationship with Severity
+def visualize_weather_factors_distributions():
+    f, axes = plt.subplots(5, 2, figsize=(20, 30))
+    sns.distplot(data_best_df['Temperature(F)'], ax=axes[0, 0]).set_title('Temperature(F) Distribution')
+    data_best_df["Severity"].groupby(pd.cut(data_best_df['Temperature(F)'], 10)).mean().plot(ylabel='Mean Severity',
+                                                                                             title='Mean Severity of Temperature(F)',
+                                                                                             ax=axes[0, 1])
+    sns.distplot(data_best_df['Humidity(%)'], ax=axes[1, 0]).set_title('Humidity(%) Distribution')
+    data_best_df["Severity"].groupby(pd.cut(data_best_df['Humidity(%)'], 10)).mean().plot(ylabel='Mean Severity',
+                                                                                          title='Mean Severity of Humidity(%)',
+                                                                                          ax=axes[1, 1])
+    sns.distplot(data_best_df['Pressure(in)'], ax=axes[2, 0]).set_title('Pressure(in) Distribution')
+    data_best_df["Severity"].groupby(pd.cut(data_best_df['Pressure(in)'], 10)).mean().plot(ylabel='Mean Severity',
+                                                                                           title='Mean Severity of Pressure(in)',
+                                                                                           ax=axes[2, 1])
+    sns.distplot(data_best_df['Visibility(mi)'], ax=axes[3, 0]).set_title('Visibility(mi) Distribution')
+    data_best_df["Severity"].groupby(pd.cut(data_best_df['Visibility(mi)'], 10)).mean().plot(ylabel='Mean Severity',
+                                                                                             title='Mean Severity of Visibility(mi)',
+                                                                                             ax=axes[3, 1])
+    sns.distplot(data_best_df['Wind_Speed(mph)'], ax=axes[4, 0]).set_title('Wind_Speed(mph) Distribution')
+    data_best_df["Severity"].groupby(pd.cut(data_best_df['Wind_Speed(mph)'], 10)).mean().plot(ylabel='Mean Severity',
+                                                                                              title='Mean Severity of Wind_Speed(mph)',
+                                                                                              ax=axes[4, 1])
+    plt.suptitle("Temperature, Humidity, Pressure, Visibility and Wind Speed - Distribution && Mean Severity", y=0.95,
+                 fontsize=20)
+    plt.plot()
+
+
+# Set up the matplotlib figure
+visualize_weather_factors_distributions()
+
+
+def visualize_accidents_sunrise_sunset():
+    # Accidents distribution by Sunrise && Sunset
+    # Set up the matplotlib figure
+    f, axes = plt.subplots(nrows=1, ncols=2, figsize=(20, 8))
+    # Pie chart
+    data_best_df["Sunrise_Sunset"].value_counts().plot.pie(autopct="%.1f%%", ylabel='', ax=axes[0])
+    sns.countplot(x="Sunrise_Sunset",
+                  data=data_best_df,
+                  order=data_best_df['Sunrise_Sunset'].value_counts().index,
+                  hue='Severity',
+                  ax=axes[1])
+    for p in axes[1].patches:
+        axes[1].annotate(p.get_height(), (p.get_x() + 0.025, p.get_height() + 100))
+    # Common title
+    plt.suptitle("Accidents distribution by Sunrise && Sunset", y=0.95, fontsize=20)
+    plt.show()
+
+
+# 3.4.4. Accidents distribution by Sunrise && Sunset
+visualize_accidents_sunrise_sunset()
