@@ -563,29 +563,29 @@ visualize_top_10_zipcodes_accidents_by_severity()
 # 3.2.6. What are the accidents distribution by street Side?
 # Accidents distribution by street Side
 # Set up the matplotlib figure
-# def visualize_accident_distribution_by_street_side():
-#     f, axes = plt.subplots(nrows=1, ncols=2, figsize=(20, 8))
-#     # Pie chart
-#     print("visualize_accident_distribution_by_street_side")
-#     print(data_best_df)
-#     data_best_df["Side"].value_counts().plot.pie(autopct="%.1f%%", ylabel='', ax=axes[0])
-#     sns.countplot(x="Side",
-#                   data=data_best_df,
-#                   order=data_best_df['Side'].value_counts().index,
-#                   hue='Severity',
-#                   ax=axes[1])
-#     for p in axes[1].patches:
-#         axes[1].annotate(p.get_height(), (p.get_x() + 0.05, p.get_height() + 100))
-#     # Common title
-#     plt.suptitle("Accidents distribution by street Side", y=0.95, fontsize=20)
-#     plt.show()
-#
-# visualize_accident_distribution_by_street_side()
+def visualize_accident_distribution_by_street_side():
+    f, axes = plt.subplots(nrows=1, ncols=2, figsize=(20, 8))
+    # Pie chart
+    print("visualize_accident_distribution_by_street_side")
+    print(data_best_df)
+    data_best_df["Side"].value_counts().plot.pie(autopct="%.1f%%", ylabel='', ax=axes[0])
+    sns.countplot(x="Side",
+                  data=data_best_df,
+                  order=data_best_df['Side'].value_counts().index,
+                  hue='Severity',
+                  ax=axes[1])
+    for p in axes[1].patches:
+        axes[1].annotate(p.get_height(), (p.get_x() + 0.05, p.get_height() + 100))
+    # Common title
+    plt.suptitle("Accidents distribution by street Side", y=0.95, fontsize=20)
+    plt.show()
+
+visualize_accident_distribution_by_street_side()
 
 
+year_accidents_count = data_best_df["Start_Time"].dt.year.value_counts()
+year_accidents_count_df = pd.DataFrame(year_accidents_count)
 def visualize_yearly_accident_change():
-    year_accidents_count = data_best_df["Start_Time"].dt.year.value_counts()
-    year_accidents_count_df = pd.DataFrame(year_accidents_count)
     year_accidents_count_fig = px.bar(year_accidents_count,
                                       x=year_accidents_count.index,
                                       y="count",
@@ -611,11 +611,11 @@ def visualize_yearly_accident_change():
 # Accidents yearly change
 visualize_yearly_accident_change()
 
+# https://hedgescompany.com/automotive-market-research-statistics/auto-mailing-lists-and-marketing/
+registered_vehicles_df = pd.DataFrame(data=[264.0, 270.4, 279.1, 284.5, 286.9], columns=['Numbers(million)'],
+                                      index=[2016, 2017, 2018, 2019, 2020])
 
 def visualize_yearly_change_in_registered_vehicles():
-    # https://hedgescompany.com/automotive-market-research-statistics/auto-mailing-lists-and-marketing/
-    registered_vehicles_df = pd.DataFrame(data=[264.0, 270.4, 279.1, 284.5, 286.9], columns=['Numbers(million)'],
-                                          index=[2016, 2017, 2018, 2019, 2020])
     registered_vehicles_fig = px.bar(registered_vehicles_df,
                                      x=registered_vehicles_df.index,
                                      y="Numbers(million)",
@@ -639,221 +639,254 @@ def visualize_yearly_change_in_registered_vehicles():
 visualize_yearly_change_in_registered_vehicles()
 
 
-# def visualize_accident_vehicle_change_comparison():
-#     year_accidents_pct_df = year_accidents_count_df.sort_index().pct_change().rename(
-#         columns={'Start_Time': 'Accidents'})
-#     registered_vehicles_pct_df = registered_vehicles_df.pct_change().rename(columns={'Numbers(million)': 'Vehicles'})
-#     comparison_pct_df = pd.concat([year_accidents_pct_df, registered_vehicles_pct_df], axis=1).dropna()
-#     comparison_pct_fig = go.Figure()
-#     comparison_pct_fig.add_trace(go.Scatter(x=comparison_pct_df.index, y=comparison_pct_df['Accidents'],
-#                                             mode='lines+markers',
-#                                             name='Accidents'))
-#     comparison_pct_fig.add_trace(go.Scatter(x=comparison_pct_df.index, y=comparison_pct_df['Vehicles'],
-#                                             mode='lines+markers',
-#                                             name='Vehicles'))
-#     comparison_pct_fig.update_layout(
-#         autosize=False,
-#         width=800,
-#         height=600,
-#         title={
-#             'text': "Accidents Vs Vehicles (Number)",
-#             'y': 0.95,
-#             'x': 0.5,
-#             'font': {'size': 24},
-#             'xanchor': 'center',
-#             'yanchor': 'top'},
-#         xaxis_title='Year',
-#         yaxis_title='Percentage Rate(%)')
-#     comparison_pct_fig.update_xaxes(type='category')
-#     comparison_pct_fig.show()
-#
-#
-# # Calcute and Concat yearly accidents change rate and yearly registered vehicles change rate, then compare them in one graph.
-# visualize_accident_vehicle_change_comparison()
-#
-#
-# def visualize_monthly_accident_change():
-#     # https://plotly.com/python/categorical-axes/
-#     month_accidents_count = data_best_df["Start_Time"].dt.month.value_counts()
-#     month_accidents_count_df = pd.DataFrame(month_accidents_count)
-#     month_accidents_count_df.sort_index(inplace=True)
-#     month_accidents_count_fig = px.bar(month_accidents_count_df,
-#                                        x=month_accidents_count_df.index,
-#                                        y="Start_Time",
-#                                        labels={"index": "Month", "Start_Time": "Counts"},
-#                                        text="Start_Time")
-#     month_accidents_count_fig.update_layout(
-#         autosize=False,
-#         width=1000,
-#         height=500,
-#         title={
-#             'text': "Accidents monthly change",
-#             'y': 0.95,
-#             'x': 0.5,
-#             'font': {'size': 24},
-#             'xanchor': 'center',
-#             'yanchor': 'top'},
-#         xaxis={
-#             'type': 'category'
-#         })
-#     month_accidents_count_fig.show()
-#
-#
-# # 3.3.2. Month
-# # Extract Month
-# visualize_monthly_accident_change()
-#
-#
-# def visualize_weekly_accident_change():
-#     week_accidents_count = data_best_df["Start_Time"].dt.day_name().value_counts()
-#     week_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-#     week_accidents_count_df = pd.DataFrame(week_accidents_count).reindex(week_order)
-#     week_accidents_count_fig = px.bar(week_accidents_count_df,
-#                                       x=week_accidents_count_df.index,
-#                                       y="Start_Time",
-#                                       labels={"index": "Week", "Start_Time": "Counts"},
-#                                       text="Start_Time")
-#     week_accidents_count_fig.update_layout(
-#         autosize=False,
-#         width=800,
-#         height=500,
-#         title={
-#             'text': "Accidents weekly change",
-#             'y': 0.95,
-#             'x': 0.5,
-#             'font': {'size': 24},
-#             'xanchor': 'center',
-#             'yanchor': 'top'})
-#     # week_accidents_count_fig.update_xaxes(categoryorder = "total ascending")
-#     week_accidents_count_fig.show()
-#
-#
-# # 3.3.3. Week
-# # Extract Week
-# visualize_weekly_accident_change()
-#
-#
-# def visualize_monthly_weekly_accident_change():
-#     data_best_df["Month"] = data_best_df["Start_Time"].dt.month
-#     data_best_df["Week"] = data_best_df["Start_Time"].dt.day_name()
-#     data_best_df["Hour"] = data_best_df["Start_Time"].dt.hour
-#     # Monthly view with weeks
-#     data_best_df.groupby('Month')['Week'].value_counts().unstack()[week_order].plot.bar(
-#         figsize=(20, 8),
-#         ylabel='Counts',
-#         width=.8
-#     )
-#     plt.title("Accidents Monthly change in a view of week", fontsize=22)
-#     plt.show()
-#
-#
-# # Transform Month/week/Hour to different features
-# visualize_monthly_weekly_accident_change()
-#
-#
-# def visualize_hourly_weekday_accident_change():
-#     weekdays_lst = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
-#     hour_accidents_weekdays_count = data_best_df[data_best_df['Week'].isin(weekdays_lst)]["Start_Time"].dt.hour
-#     hour_accidents_weekdays_count_df = pd.DataFrame(hour_accidents_weekdays_count.value_counts())
-#     hour_accidents_weekdays_count_df.sort_index(inplace=True)
-#     hour_accidents_weekdays_count_fig = px.bar(hour_accidents_weekdays_count_df,
-#                                                x=hour_accidents_weekdays_count_df.index,
-#                                                y="Start_Time",
-#                                                labels={"index": "Hour", "Start_Time": "Counts"},
-#                                                text="Start_Time")
-#     hour_accidents_weekdays_count_fig.update_layout(
-#         autosize=False,
-#         width=1000,
-#         height=500,
-#         title={
-#             'text': "Accidents hourly change(Weekdays)",
-#             'y': 0.95,
-#             'x': 0.5,
-#             'font': {'size': 24},
-#             'xanchor': 'center',
-#             'yanchor': 'top'},
-#         xaxis={
-#             'type': 'category'
-#         })
-#     hour_accidents_weekdays_count_fig.show()
-#
-#
-# # 3.3.4. Hour
-# # Extract Hour (Weekday)
-# visualize_hourly_weekday_accident_change()
-#
-#
-# def visualize_hourly_weekend_accident_change():
-#     weekend_lst = ['Saturday', 'Sunday']
-#     hour_accidents_weekend_count = data_best_df[data_best_df['Week'].isin(weekend_lst)]["Start_Time"].dt.hour
-#     hour_accidents_weekend_count_df = pd.DataFrame(hour_accidents_weekend_count.value_counts())
-#     hour_accidents_weekend_count_df.sort_index(inplace=True)
-#     hour_accidents_weekend_count_fig = px.bar(hour_accidents_weekend_count_df,
-#                                               x=hour_accidents_weekend_count_df.index,
-#                                               y="Start_Time",
-#                                               labels={"index": "Hour", "Start_Time": "Counts"},
-#                                               text="Start_Time")
-#     hour_accidents_weekend_count_fig.update_layout(
-#         autosize=False,
-#         width=1000,
-#         height=500,
-#         title={
-#             'text': "Accidents hourly change(Weekend)",
-#             'y': 0.95,
-#             'x': 0.5,
-#             'font': {'size': 24},
-#             'xanchor': 'center',
-#             'yanchor': 'top'},
-#         xaxis={
-#             'type': 'category'
-#         })
-#     hour_accidents_weekend_count_fig.show()
-#
-#
-# # Extract Hour (Weekend)
-# visualize_hourly_weekend_accident_change()
-#
-#
-# def visualize_weekly_hourly_accident_change():
-#     data_best_df.groupby('Week')['Hour'].value_counts().unstack().reindex(week_order).plot.bar(
-#         figsize=(22, 8),
-#         ylabel='Counts',
-#         width=.9
-#     )
-#     plt.title("Accidents Weekly change in a view of hour", fontsize=22)
-#     plt.show()
-#
-#
-# # Weekly view with hours
-# visualize_weekly_hourly_accident_change()
-#
-#
-# def visualize_mean_duration_per_severity():
-#     data_best_df["Duration"] = (data_best_df['End_Time'] - data_best_df['Start_Time']).dt.total_seconds() / 3600
-#     mean_duration = data_best_df.groupby('Severity')["Duration"].mean().round(2)
-#     mean_duration_df = pd.DataFrame(mean_duration)
-#     mean_duration_fig = px.bar(mean_duration_df,
-#                                x=mean_duration_df.index,
-#                                y="Duration",
-#                                labels={"index": "Severity"},
-#                                text="Duration")
-#     mean_duration_fig.update_layout(
-#         autosize=False,
-#         width=600,
-#         height=500,
-#         title={
-#             'text': "Mean Duration of each Severity",
-#             'y': 0.95,
-#             'x': 0.5,
-#             'font': {'size': 24},
-#             'xanchor': 'center',
-#             'yanchor': 'top'},
-#         xaxis={
-#             'type': 'category'
-#         })
-#     mean_duration_fig.show()
-#
-#
-# # 3.3.5. Duration and Severity
-# # Calculate the mean Duration of each Severity
-# visualize_mean_duration_per_severity()
+def visualize_accident_vehicle_change_comparison():
+    print("visualize_accident_vehicle_change_comparison")
+    # 確認 year_accidents_count_df 的結構和列名
+    year_accidents_pct_df = year_accidents_count_df.sort_index().pct_change().rename(
+        columns={'count': 'Accidents'})  # 確認並重命名列名為 'Accidents'
+    print("year_accidents_pct_df:")
+    print(year_accidents_pct_df)
+
+    # 確認 registered_vehicles_df 的結構和列名
+    registered_vehicles_pct_df = registered_vehicles_df.pct_change().rename(columns={'Numbers(million)': 'Vehicles'})
+    print("registered_vehicles_pct_df:")
+    print(registered_vehicles_pct_df)
+
+    # 合併數據框
+    comparison_pct_df = pd.concat([year_accidents_pct_df, registered_vehicles_pct_df], axis=1).dropna()
+    print("comparison_pct_df:")
+    print(comparison_pct_df)
+
+    # 繪製圖表
+    comparison_pct_fig = go.Figure()
+    comparison_pct_fig.add_trace(go.Scatter(x=comparison_pct_df.index, y=comparison_pct_df['Accidents'],
+                                            mode='lines+markers',
+                                            name='Accidents'))
+    comparison_pct_fig.add_trace(go.Scatter(x=comparison_pct_df.index, y=comparison_pct_df['Vehicles'],
+                                            mode='lines+markers',
+                                            name='Vehicles'))
+    comparison_pct_fig.update_layout(
+        autosize=False,
+        width=800,
+        height=600,
+        title={
+            'text': "Accidents Vs Vehicles (Number)",
+            'y': 0.95,
+            'x': 0.5,
+            'font': {'size': 24},
+            'xanchor': 'center',
+            'yanchor': 'top'},
+        xaxis_title='Year',
+        yaxis_title='Percentage Rate(%)')
+    comparison_pct_fig.update_xaxes(type='category')
+    comparison_pct_fig.show()
+
+
+# Calcute and Concat yearly accidents change rate and yearly registered vehicles change rate, then compare them in one graph.
+visualize_accident_vehicle_change_comparison()
+
+
+def visualize_monthly_accident_change():
+    # https://plotly.com/python/categorical-axes/
+    month_accidents_count = data_best_df["Start_Time"].dt.month.value_counts()
+    print("visualize_monthly_accident_change")
+    print(month_accidents_count)
+    month_accidents_count_df = month_accidents_count.reset_index()
+    month_accidents_count_df.columns = ['Month', 'Count']
+    month_accidents_count_fig = px.bar(month_accidents_count_df,
+                                       x='Month',
+                                       y='Count',
+                                       labels={"Month": "Month", "Count": "Counts"},
+                                       text='Count')
+    month_accidents_count_fig.update_layout(
+        autosize=False,
+        width=1000,
+        height=500,
+        title={
+            'text': "Accidents Monthly Change",
+            'y': 0.95,
+            'x': 0.5,
+            'font': {'size': 24},
+            'xanchor': 'center',
+            'yanchor': 'top'},
+        xaxis={
+            'type': 'category'
+        })
+    month_accidents_count_fig.show()
+
+
+# 3.3.2. Month
+# Extract Month
+visualize_monthly_accident_change()
+
+week_accidents_count = data_best_df["Start_Time"].dt.day_name().value_counts()
+week_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+
+def visualize_weekly_accident_change():
+    # 將 week_accidents_count 轉換為數據框並重置索引
+    week_accidents_count_df = pd.DataFrame(week_accidents_count).reset_index()
+    week_accidents_count_df.columns = ['Week', 'Count']  # 重命名列
+
+    print("visualize_weekly_accident_change")
+    print(week_accidents_count_df)
+
+    # 使用 Plotly 繪製條形圖
+    week_accidents_count_fig = px.bar(week_accidents_count_df,
+                                      x='Week',
+                                      y='Count',
+                                      labels={"Week": "Week", "Count": "Counts"},
+                                      text='Count')
+    week_accidents_count_fig.update_layout(
+        autosize=False,
+        width=800,
+        height=500,
+        title={
+            'text': "Accidents Weekly Change",
+            'y': 0.95,
+            'x': 0.5,
+            'font': {'size': 24},
+            'xanchor': 'center',
+            'yanchor': 'top'})
+    # week_accidents_count_fig.update_xaxes(categoryorder = "total ascending")
+    week_accidents_count_fig.show()
+
+
+# 3.3.3. Week
+# Extract Week
+visualize_weekly_accident_change()
+
+
+def visualize_monthly_weekly_accident_change():
+    data_best_df["Month"] = data_best_df["Start_Time"].dt.month
+    data_best_df["Week"] = data_best_df["Start_Time"].dt.day_name()
+    data_best_df["Hour"] = data_best_df["Start_Time"].dt.hour
+    # Monthly view with weeks
+    data_best_df.groupby('Month')['Week'].value_counts().unstack()[week_order].plot.bar(
+        figsize=(20, 8),
+        ylabel='Counts',
+        width=.8
+    )
+    plt.title("Accidents Monthly change in a view of week", fontsize=22)
+    plt.show()
+
+
+# Transform Month/week/Hour to different features
+visualize_monthly_weekly_accident_change()
+
+
+# 3.3.4. Hour
+# Extract Hour (Weekday)
+def visualize_hourly_weekday_accident_change():
+    weekdays_lst = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+    hour_accidents_weekdays_count = data_best_df[data_best_df['Week'].isin(weekdays_lst)]["Start_Time"].dt.hour
+    hour_accidents_weekdays_count_df = pd.DataFrame(hour_accidents_weekdays_count.value_counts()).reset_index()
+    hour_accidents_weekdays_count_df.columns = ['Hour', 'Count']  # 重命名列
+    hour_accidents_weekdays_count_df.sort_values(by='Hour', inplace=True)
+
+    print("visualize_hourly_weekday_accident_change")
+    print(hour_accidents_weekdays_count_df)
+
+    # 使用 Plotly 繪製條形圖
+    hour_accidents_weekdays_count_fig = px.bar(hour_accidents_weekdays_count_df,
+                                               x='Hour',
+                                               y='Count',
+                                               labels={"Hour": "Hour", "Count": "Counts"},
+                                               text='Count')
+    hour_accidents_weekdays_count_fig.update_layout(
+        autosize=False,
+        width=1000,
+        height=500,
+        title={
+            'text': "Accidents Hourly Change (Weekdays)",
+            'y': 0.95,
+            'x': 0.5,
+            'font': {'size': 24},
+            'xanchor': 'center',
+            'yanchor': 'top'},
+        xaxis={
+            'type': 'category'
+        })
+    hour_accidents_weekdays_count_fig.show()
+
+visualize_hourly_weekday_accident_change()
+
+
+def visualize_hourly_weekend_accident_change():
+    weekend_lst = ['Saturday', 'Sunday']
+    hour_accidents_weekend_count = data_best_df[data_best_df['Week'].isin(weekend_lst)]["Start_Time"].dt.hour
+    hour_accidents_weekend_count_df = pd.DataFrame(hour_accidents_weekend_count.value_counts())
+    hour_accidents_weekend_count_df.sort_index(inplace=True)
+    print("visualize_hourly_weekend_accident_change")
+    print(hour_accidents_weekend_count_df)
+    hour_accidents_weekend_count_fig = px.bar(hour_accidents_weekend_count_df,
+                                              x=hour_accidents_weekend_count_df.index,
+                                              y="count",
+                                              labels={"index": "Hour", "count": "Counts"},
+                                              text="count")
+    hour_accidents_weekend_count_fig.update_layout(
+        autosize=False,
+        width=1000,
+        height=500,
+        title={
+            'text': "Accidents hourly change(Weekend)",
+            'y': 0.95,
+            'x': 0.5,
+            'font': {'size': 24},
+            'xanchor': 'center',
+            'yanchor': 'top'},
+        xaxis={
+            'type': 'category'
+        })
+    hour_accidents_weekend_count_fig.show()
+
+
+# Extract Hour (Weekend)
+visualize_hourly_weekend_accident_change()
+
+
+def visualize_weekly_hourly_accident_change():
+    data_best_df.groupby('Week')['Hour'].value_counts().unstack().reindex(week_order).plot.bar(
+        figsize=(22, 8),
+        ylabel='Counts',
+        width=.9
+    )
+    plt.title("Accidents Weekly change in a view of hour", fontsize=22)
+    plt.show()
+
+
+# Weekly view with hours
+visualize_weekly_hourly_accident_change()
+
+
+def visualize_mean_duration_per_severity():
+    data_best_df["Duration"] = (data_best_df['End_Time'] - data_best_df['Start_Time']).dt.total_seconds() / 3600
+    mean_duration = data_best_df.groupby('Severity')["Duration"].mean().round(2)
+    mean_duration_df = pd.DataFrame(mean_duration)
+    mean_duration_fig = px.bar(mean_duration_df,
+                               x=mean_duration_df.index,
+                               y="Duration",
+                               labels={"index": "Severity"},
+                               text="Duration")
+    mean_duration_fig.update_layout(
+        autosize=False,
+        width=600,
+        height=500,
+        title={
+            'text': "Mean Duration of each Severity",
+            'y': 0.95,
+            'x': 0.5,
+            'font': {'size': 24},
+            'xanchor': 'center',
+            'yanchor': 'top'},
+        xaxis={
+            'type': 'category'
+        })
+    mean_duration_fig.show()
+
+
+# 3.3.5. Duration and Severity
+# Calculate the mean Duration of each Severity
+visualize_mean_duration_per_severity()
+
+print()
