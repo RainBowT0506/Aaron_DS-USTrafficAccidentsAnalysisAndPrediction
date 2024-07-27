@@ -995,3 +995,29 @@ def visualize_accidents_sunrise_sunset():
 
 # 3.4.4. Accidents distribution by Sunrise && Sunset
 visualize_accidents_sunrise_sunset()
+
+
+
+# 3.5. Infrastructure Analysis
+def visualize_infrastructure_feature_distribution():
+    f, axes = plt.subplots(13, 2, figsize=(20, 80))
+    infrastructure_features = ['Traffic_Signal', 'Crossing', 'Station', 'Amenity', 'Bump', 'Give_Way', 'Junction',
+                               'No_Exit', 'Railway', 'Roundabout', 'Stop', 'Traffic_Calming', 'Turning_Loop']
+    for infrastructure_feature, number in zip(infrastructure_features, range(0, 13)):
+        data_best_df[infrastructure_feature].value_counts().plot.pie(autopct="%.2f%%", ylabel='',
+                                                                     ax=axes[number, 0]).set_title(
+            f'{infrastructure_feature} Distribution')
+        sns.countplot(x=infrastructure_feature,
+                      data=data_best_df,
+                      order=data_best_df[infrastructure_feature].value_counts().index,
+                      hue='Severity',
+                      ax=axes[number, 1]).set_title(f'{infrastructure_feature} Analysis')
+        # Add number on corresponding bar
+        for p in axes[number, 1].patches:
+            axes[number, 1].annotate(p.get_height(), (p.get_x() + 0.025, p.get_height() + 100))
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    plt.suptitle("Severity Distribution by Infrastructure Features", y=0.98, fontsize=20)
+    plt.show()
+
+# Show the severity distribution of each category(True/False)
+visualize_infrastructure_feature_distribution()
