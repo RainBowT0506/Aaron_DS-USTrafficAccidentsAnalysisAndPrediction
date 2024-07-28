@@ -1910,3 +1910,136 @@ pd.DataFrame([-(lr_search.best_score_), -(svr_search.best_score_), -(dtr_search.
 
 # 5.2.3 Visualization
 
+# 5.3. Severity Prediction
+# 5.3.1 Parameter Tuning
+# Logistic Regression
+logistic_pipe = make_pipeline(LogisticRegression(solver='liblinear'))
+logistic_param = {
+    'logisticregression__C': [0.1, 1.0, 10],
+    'logisticregression__fit_intercept': [True, False]
+}
+
+logistic_search = GridSearchCV(logistic_pipe,
+                      logistic_param,
+                      scoring="f1_weighted",
+                      n_jobs=-1,
+                      cv = 5)
+logistic_search.fit(X_cla, Y_cla)
+print(f'Best Params: {logistic_search.best_params_} \nBest score: {logistic_search.best_score_}')
+
+
+# SVC
+svc_pipe = make_pipeline(SVC())
+svc_param = {
+    'svc__C': [0.1, 1.0, 10],
+    'svc__kernel': ['rbf', 'sigmoid'],
+    'svc__gamma': [1, 0.1, 0.01]
+}
+
+svc_search = GridSearchCV(svc_pipe,
+                         svc_param,
+                         scoring="f1_weighted",
+                         n_jobs=-1,
+                         cv = 5)
+svc_search.fit(X_cla, Y_cla)
+print(f'Best Params: {svc_search.best_params_} \nBest score: {svc_search.best_score_}')
+
+# Decision Tree Classification
+dtc_pipe = make_pipeline(DecisionTreeClassifier(random_state=0))
+dtc_param = {
+    'decisiontreeclassifier__max_depth': [5, 10, 20],
+    'decisiontreeclassifier__min_samples_leaf': [2, 5, 10],
+    'decisiontreeclassifier__min_impurity_decrease': [0.1, 0.2, 0.5]
+}
+
+dtc_search = GridSearchCV(dtc_pipe,
+                         dtc_param,
+                         scoring="f1_weighted",
+                         n_jobs=-1,
+                         cv = 5)
+dtc_search.fit(X_cla, Y_cla)
+print(f'Best Params: {dtc_search.best_params_} \nBest score: {dtc_search.best_score_}')
+
+
+# Gradient Boosting Classification
+gbtc_pipe = make_pipeline(GradientBoostingClassifier(random_state=0))
+gbtc_param = {
+    'gradientboostingclassifier__learning_rate': [0.1, 0.3, 0.7],
+    'gradientboostingclassifier__max_depth': [5, 10, 20],
+    'gradientboostingclassifier__n_estimators': [50, 100, 200],
+    'gradientboostingclassifier__min_samples_leaf': [2, 5, 10],
+    'gradientboostingclassifier__min_impurity_decrease': [0.1, 0.2, 0.5]
+}
+
+gbtc_search = GridSearchCV(gbtc_pipe,
+                         gbtc_param,
+                         scoring="f1_weighted",
+                         n_jobs=-1,
+                         cv = 5)
+gbtc_search.fit(X_cla, Y_cla)
+print(f'Best Params: {gbtc_search.best_params_} \nBest score: {gbtc_search.best_score_}')
+
+
+# Random Forest Classification
+rfc_pipe = make_pipeline(RandomForestClassifier(random_state=0))
+rfc_param = {
+    'randomforestclassifier__max_depth': [5, 10, 20],
+    'randomforestclassifier__n_estimators': [50, 100, 200],
+    'randomforestclassifier__min_impurity_decrease': [0.1, 0.2, 0.5],
+    'randomforestclassifier__min_samples_leaf': [2, 5, 10],
+}
+
+rfc_search = GridSearchCV(rfc_pipe,
+                         rfc_param,
+                         scoring="f1_weighted",
+                         n_jobs=-1,
+                         cv = 5)
+rfc_search.fit(X_cla, Y_cla)
+print(f'Best Params: {rfc_search.best_params_} \nBest score: {rfc_search.best_score_}')
+
+# XGB Classification
+# https://xgboost.readthedocs.io/en/latest/tutorials/param_tuning.html
+# https://stats.stackexchange.com/questions/243207/what-is-the-proper-usage-of-scale-pos-weight-in-xgboost-for-imbalanced-datasets
+xgbc_pipe = make_pipeline(XGBClassifier(eval_metric='mlogloss', random_state=0))
+xgbc_param = {
+              'xgbclassifier__learning_rate': [0.1, 0.3, 0.7],
+              'xgbclassifier__max_depth': [5, 10, 20],
+              'xgbclassifier__n_estimators': [50, 100, 200],
+              'xgbclassifier__scale_pos_weight': [5, 10, 30]}
+
+xgbc_search = GridSearchCV(xgbc_pipe,
+                         xgbc_param,
+                         scoring="f1_weighted",
+                         n_jobs=-1,
+                         cv = 5)
+xgbc_search.fit(X_cla, Y_cla)
+print(f'Best Params: {xgbc_search.best_params_} \nBest score: {xgbc_search.best_score_}')
+
+# Multi-layer Perceptron classifier
+mlpc_pipe = make_pipeline(MLPClassifier(random_state=0))
+mlpc_param = {
+              'mlpclassifier__activation': ['logistic', 'tanh', 'relu'],
+              'mlpclassifier__hidden_layer_sizes': [(50,), (100,100)],
+              'mlpclassifier__learning_rate': ['invscaling', 'adaptive']
+             }
+
+mlpc_search = GridSearchCV(mlpc_pipe,
+                         mlpc_param,
+                         scoring="f1_weighted",
+                         n_jobs=-1,
+                         cv = 5)
+mlpc_search.fit(X_cla, Y_cla)
+print(f'Best Params: {mlpc_search.best_params_} \nBest score: {mlpc_search.best_score_}')
+
+# 5.3.2 Model Comparison
+pd.DataFrame([logistic_search.best_score_, svc_search.best_score_, dtc_search.best_score_, gbtc_search.best_score_, rfc_search.best_score_, xgbc_search.best_score_, mlpc_search.best_score_],
+             columns=['F1-score'],
+             index= ['logistics Regression',
+                    'Support Vector Machine',
+                    'Decision Tree',
+                    'Gradient Boosting Tree',
+                    'Random Forest',
+                    'XGBoost',
+                    'Multi-layer Perceptron']).sort_values(by=['F1-score'], ascending=False)
+
+# 5.3.3 Visualization
