@@ -1765,3 +1765,148 @@ for lat, lng, label in zip(x_test_cla['Start_Lat'], x_test_cla['Start_Lng'], xgb
             ).add_to(accidents)
 # Display map
 orlando_map
+
+
+# 5.2. End Time Prediction
+# 5.2.1 Parameter Turning
+######Stop line######
+# The following code can not run out at Kaggle because of the resource limitation; Have already done it on Google Colab. Therefore, stop here.
+
+# Linear Regression
+# https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html
+lr_pipe = make_pipeline(LinearRegression())
+# lr_pipe.get_params().keys()
+lr_param = {
+    'linearregression__fit_intercept': [True, False],
+    'linearregression__normalize': [True, False]
+}
+
+lr_search = GridSearchCV(lr_pipe,
+                         lr_param,
+                         scoring="neg_root_mean_squared_error",
+                         n_jobs=-1,
+                         cv = 5)
+lr_search.fit(X_reg, Y_reg)
+print(f'Best Params: {lr_search.best_params_} \nBest score: {-(lr_search.best_score_)}')
+
+
+# SVR
+# https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVR.html
+# https://7125messi.github.io/post/svm%E8%B0%83%E4%BC%98%E8%AF%A6%E8%A7%A3/
+svr_pipe = make_pipeline(StandardScaler(), SVR())
+svr_param = {
+    'svr__C': [0.1, 1.0, 10],
+    'svr__gamma': [1, 0.1, 0.01]
+}
+
+svr_search = GridSearchCV(svr_pipe,
+                         svr_param,
+                         scoring="neg_root_mean_squared_error",
+                         n_jobs=-1,
+                         cv = 5)
+svr_search.fit(X_reg, Y_reg)
+print(f'Best Params: {svr_search.best_params_} \nBest score: {-(svr_search.best_score_)}')
+
+# Decision Tree Regression
+# https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeRegressor.html
+dtr_pipe = make_pipeline(DecisionTreeRegressor(random_state=0))
+dtr_param = {
+    'decisiontreeregressor__max_depth': [5, 10, 20],
+    'decisiontreeregressor__min_samples_leaf': [2, 5, 10],
+    'decisiontreeregressor__min_impurity_decrease': [0.1, 0.2, 0.5]
+
+}
+
+dtr_search = GridSearchCV(dtr_pipe,
+                          dtr_param,
+                          scoring="neg_root_mean_squared_error",
+                          n_jobs=-1,
+                          cv=5)
+dtr_search.fit(X_reg, Y_reg)
+print(f'Best Params: {dtr_search.best_params_} \nBest score: {-(dtr_search.best_score_)}')
+
+# Gradient Boosting Regression
+# https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.GradientBoostingRegressor.html
+gbtr_pipe = make_pipeline(GradientBoostingRegressor(random_state=0))
+gbtr_param = {
+    'gradientboostingregressor__learning_rate': [0.1, 0.3, 0.7],
+    'gradientboostingregressor__max_depth': [5, 10, 20],
+    'gradientboostingregressor__n_estimators': [50, 100, 200],
+    'gradientboostingregressor__min_impurity_decrease': [0.1, 0.2, 0.5],
+    'gradientboostingregressor__min_samples_leaf': [2, 5, 10]
+
+}
+
+gbtr_search = GridSearchCV(gbtr_pipe,
+                           gbtr_param,
+                           scoring="neg_root_mean_squared_error",
+                           n_jobs=-1,
+                           cv=5)
+gbtr_search.fit(X_reg, Y_reg)
+print(f'Best Params: {gbtr_search.best_params_} \nBest score: {-(gbtr_search.best_score_)}')
+
+# Random Forest Regression
+rfr_pipe = make_pipeline(RandomForestRegressor(random_state=0))
+rfr_param = {
+    'randomforestregressor__max_depth': [5, 10, 20],
+    'randomforestregressor__n_estimators': [50, 100, 200],
+    'randomforestregressor__min_impurity_decrease': [0.1, 0.2, 0.5],
+    'randomforestregressor__min_samples_leaf': [2, 5, 10],
+
+}
+
+rfr_search = GridSearchCV(rfr_pipe,
+                          rfr_param,
+                          scoring="neg_root_mean_squared_error",
+                          n_jobs=-1,
+                          cv=5)
+rfr_search.fit(X_reg, Y_reg)
+print(f'Best Params: {rfr_search.best_params_} \nBest score: {-(rfr_search.best_score_)}')
+
+
+# XGB Regression
+xgbr_pipe = make_pipeline(XGBRegressor(random_state=0))
+xgbr_param = {
+              'xgbregressor__learning_rate': [0.1, 0.3, 0.7],
+              'xgbregressor__max_depth': [30, 50, 100],
+              'xgbregressor__n_estimators': [50, 100, 200]
+             }
+
+xgbr_search = GridSearchCV(xgbr_pipe,
+                         xgbr_param,
+                         scoring="neg_root_mean_squared_error",
+                         n_jobs=-1,
+                         cv = 5)
+xgbr_search.fit(X_reg, Y_reg)
+print(f'Best Params: {xgbr_search.best_params_} \nBest score: {-(xgbr_search.best_score_)}')
+
+# Multi-layer Perceptron regressor
+mlpr_pipe = make_pipeline(MLPRegressor(random_state=0))
+mlpr_param = {
+              'mlpregressor__activation': ['logistic', 'tanh', 'relu'],
+              'mlpregressor__hidden_layer_sizes': [(100,), (50, 100), (50, 75, 100)],
+              'mlpregressor__learning_rate': ['invscaling', 'adaptive']
+             }
+
+mlpr_search = GridSearchCV(mlpr_pipe,
+                         mlpr_param,
+                         scoring="neg_root_mean_squared_error",
+                         n_jobs=-1,
+                         cv = 5)
+mlpr_search.fit(X_reg, Y_reg)
+print(f'Best Params: {mlpr_search.best_params_} \nBest score: {-(mlpr_search.best_score_)}')
+
+
+# 5.2.2 Model Comparison
+pd.DataFrame([-(lr_search.best_score_), -(svr_search.best_score_), -(dtr_search.best_score_), -(gbtr_search.best_score_), -(rfr_search.best_score_), -(xgbr_search.best_score_), -(mlpr_search.best_score_)],
+             columns=['RMSE'],
+             index= ['Linear Regression',
+                    'Support Vector Machine',
+                    'Decision Tree',
+                    'Gradient Boosting Tree',
+                    'Random Forest',
+                    'XGBoost',
+                    'Multi-layer Perceptron']).sort_values(by=['RMSE'])
+
+# 5.2.3 Visualization
+
